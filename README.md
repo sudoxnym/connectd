@@ -113,14 +113,47 @@ docker compose run --rm connectd python cli.py status
 
 ## environment variables
 
-see `.env.example` for full list. minimum required:
+copy `.env.example` to `.env` and fill in your values:
 
-- `GROQ_API_KEY` - for LLM intro drafting
-- at least one delivery method (SMTP, mastodon, etc)
+```bash
+cp .env.example .env
+```
 
-optional but recommended:
-- `GITHUB_TOKEN` - higher rate limits
-- `DISCORD_BOT_TOKEN` + `DISCORD_TARGET_SERVERS` - discord discovery
+### required
+
+| variable | description |
+|----------|-------------|
+| `GROQ_API_KEY` | for LLM intro drafting ([get one here](https://console.groq.com)) |
+
+### discovery sources
+
+| variable | description |
+|----------|-------------|
+| `GITHUB_TOKEN` | higher rate limits for github API |
+| `DISCORD_BOT_TOKEN` | discord bot token for server access |
+| `DISCORD_TARGET_SERVERS` | comma-separated server IDs to scout |
+| `LEMMY_INSTANCE` | your lemmy instance (e.g. `lemmy.ml`) |
+| `LEMMY_USERNAME` | lemmy username for auth |
+| `LEMMY_PASSWORD` | lemmy password for auth |
+
+### delivery methods
+
+| variable | description |
+|----------|-------------|
+| `MASTODON_TOKEN` | mastodon access token |
+| `MASTODON_INSTANCE` | your mastodon instance (e.g. `mastodon.social`) |
+| `BLUESKY_HANDLE` | bluesky handle (e.g. `you.bsky.social`) |
+| `BLUESKY_APP_PASSWORD` | bluesky app password |
+| `MATRIX_HOMESERVER` | matrix homeserver URL |
+| `MATRIX_USER_ID` | matrix user ID (e.g. `@bot:matrix.org`) |
+| `MATRIX_ACCESS_TOKEN` | matrix access token |
+| `SMTP_HOST` | email server host |
+| `SMTP_PORT` | email server port (default 465) |
+| `SMTP_USER` | email username |
+| `SMTP_PASS` | email password |
+| `FROM_EMAIL` | from address for emails |
+
+you need at least ONE delivery method configured for intros to be sent.
 
 ## architecture
 
