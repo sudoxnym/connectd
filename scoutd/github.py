@@ -19,6 +19,7 @@ from .lost import (
     classify_user,
     get_signal_descriptions,
 )
+from .handles import discover_all_handles
 
 # rate limit: 60/hr unauthenticated, 5000/hr with token
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
@@ -203,6 +204,16 @@ def analyze_github_user(login):
         if lost_descriptions:
             reasons.append(f"LOST SIGNALS: {', '.join(lost_descriptions[:3])}")
 
+    # === DEEP HANDLE DISCOVERY ===
+    # follow blog links, scrape websites, find ALL social handles
+    handles, discovered_emails = discover_all_handles(user)
+
+    # merge discovered emails with github email
+    all_emails = discovered_emails or []
+    if user.get('email'):
+        all_emails.append(user['email'])
+    all_emails = list(set(e for e in all_emails if e and 'noreply' not in e.lower()))
+
     return {
         'platform': 'github',
         'username': login,
@@ -220,9 +231,22 @@ def analyze_github_user(login):
         'total_stars': total_stars,
         'reasons': reasons,
         'contact': {
-            'email': user.get('email'),
+            'email': all_emails[0] if all_emails else None,
+            'emails': all_emails,
             'blog': user.get('blog'),
-            'twitter': user.get('twitter_username'),
+            'twitter': user.get('twitter_username') or handles.get('twitter'),
+            'mastodon': handles.get('mastodon'),
+            'bluesky': handles.get('bluesky'),
+            'matrix': handles.get('matrix'),
+            'lemmy': handles.get('lemmy'),
+        },
+        'extra': {
+            'topics': list(aligned_topics),
+            'languages': dict(languages),
+            'repo_count': len(repos),
+            'total_stars': total_stars,
+            'hireable': user.get('hireable', False),
+            'handles': handles,  # all discovered handles
         },
         'hireable': user.get('hireable', False),
         'scraped_at': datetime.now().isoformat(),
