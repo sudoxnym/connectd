@@ -83,6 +83,11 @@ MATRIX_ACCESS_TOKEN = os.environ.get('MATRIX_ACCESS_TOKEN', '')
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN', '')
 DISCORD_TARGET_SERVERS = os.environ.get('DISCORD_TARGET_SERVERS', '')
 
+# lemmy (for authenticated access to private instance)
+LEMMY_INSTANCE = os.environ.get('LEMMY_INSTANCE', '')
+LEMMY_USERNAME = os.environ.get('LEMMY_USERNAME', '')
+LEMMY_PASSWORD = os.environ.get('LEMMY_PASSWORD', '')
+
 # email (for sending intros)
 SMTP_HOST = os.environ.get('SMTP_HOST', '')
 SMTP_PORT = int(os.environ.get('SMTP_PORT', '465'))

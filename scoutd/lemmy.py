@@ -7,7 +7,7 @@ great for finding lost builders in communities like:
 - /c/antiwork, /c/workreform (lost builders!)
 - /c/selfhosted, /c/privacy, /c/opensource
 
-no auth needed for public posts.
+supports authenticated access for private instances and DM delivery.
 """
 
 import requests
@@ -23,6 +23,14 @@ from .lost import (
     analyze_text_for_lost_signals,
     classify_user,
 )
+
+# auth config from environment
+LEMMY_INSTANCE = os.environ.get('LEMMY_INSTANCE', '')
+LEMMY_USERNAME = os.environ.get('LEMMY_USERNAME', '')
+LEMMY_PASSWORD = os.environ.get('LEMMY_PASSWORD', '')
+
+# auth token cache
+_auth_token = None
 
 # popular lemmy instances
 LEMMY_INSTANCES = [
@@ -58,6 +66,89 @@ TARGET_COMMUNITIES = [
 
 CACHE_DIR = Path(__file__).parent.parent / 'db' / 'cache' / 'lemmy'
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def get_auth_token(instance=None):
+    """get auth token for lemmy instance"""
+    global _auth_token
+
+    if _auth_token:
+        return _auth_token
+
+    instance = instance or LEMMY_INSTANCE
+    if not all([instance, LEMMY_USERNAME, LEMMY_PASSWORD]):
+        return None
+
+    try:
+        url = f"https://{instance}/api/v3/user/login"
+        resp = requests.post(url, json={
+            'username_or_email': LEMMY_USERNAME,
+            'password': LEMMY_PASSWORD,
+        }, timeout=30)
+
+        if resp.status_code == 200:
+            _auth_token = resp.json().get('jwt')
+            return _auth_token
+        return None
+    except Exception as e:
+        print(f"lemmy auth error: {e}")
+        return None
+
+
+def send_lemmy_dm(recipient_username, message, dry_run=False):
+    """send a private message via lemmy"""
+    if not LEMMY_INSTANCE:
+        return False, "LEMMY_INSTANCE not configured"
+
+    if dry_run:
+        print(f"[dry run] would send lemmy DM to {recipient_username}")
+        return True, None
+
+    token = get_auth_token()
+    if not token:
+        return False, "failed to authenticate with lemmy"
+
+    try:
+        # parse recipient - could be username@instance or just username
+        if '@' in recipient_username:
+            username, instance = recipient_username.split('@', 1)
+        else:
+            username = recipient_username
+            instance = LEMMY_INSTANCE
+
+        # get recipient user id
+        user_url = f"https://{LEMMY_INSTANCE}/api/v3/user"
+        resp = requests.get(user_url, params={'username': f"{username}@{instance}"}, timeout=30)
+
+        if resp.status_code != 200:
+            # try without instance suffix for local users
+            resp = requests.get(user_url, params={'username': username}, timeout=30)
+
+        if resp.status_code != 200:
+            return False, f"could not find user {recipient_username}"
+
+        recipient_id = resp.json().get('person_view', {}).get('person', {}).get('id')
+        if not recipient_id:
+            return False, "could not get recipient id"
+
+        # send DM
+        dm_url = f"https://{LEMMY_INSTANCE}/api/v3/private_message"
+        resp = requests.post(dm_url,
+            headers={'Authorization': f'Bearer {token}'},
+            json={
+                'content': message,
+                'recipient_id': recipient_id,
+            },
+            timeout=30
+        )
+
+        if resp.status_code == 200:
+            return True, None
+        else:
+            return False, f"lemmy DM error: {resp.status_code} - {resp.text}"
+
+    except Exception as e:
+        return False, f"lemmy DM error: {str(e)}"
 
 
 def get_community_posts(instance, community, limit=50, sort='New'):
@@ -167,7 +258,12 @@ def scrape_lemmy(db, limit_per_community=30):
     lost_found = 0
     seen_users = set()
 
-    for instance in LEMMY_INSTANCES:
+    # build instance list - user's instance first if configured
+    instances = list(LEMMY_INSTANCES)
+    if LEMMY_INSTANCE and LEMMY_INSTANCE not in instances:
+        instances.insert(0, LEMMY_INSTANCE)
+
+    for instance in instances:
         print(f"  instance: {instance}")
 
         for community in TARGET_COMMUNITIES:

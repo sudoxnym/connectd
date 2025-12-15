@@ -395,6 +395,10 @@ def deliver_intro(match_data, intro_draft, dry_run=False):
         from scoutd.discord import send_discord_dm
         success, error = send_discord_dm(contact_info, intro_draft, dry_run)
 
+    elif method == 'lemmy':
+        from scoutd.lemmy import send_lemmy_dm
+        success, error = send_lemmy_dm(contact_info, intro_draft, dry_run)
+
     elif method == 'github_issue':
         owner = contact_info.get('owner')
         repo = contact_info.get('repo')

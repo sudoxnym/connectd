@@ -187,6 +187,32 @@ def determine_contact_method(human):
         if matrix_score > 0:
             activity_scores['matrix'] = {'score': matrix_score, 'info': matrix_id}
 
+    # lemmy activity (fediverse)
+    lemmy_username = human.get('username') if human.get('platform') == 'lemmy' else extra.get('lemmy')
+    if lemmy_username:
+        lemmy_score = 0
+
+        # lemmy is fediverse - high values alignment
+        lemmy_score += 20  # fediverse platform bonus
+
+        post_count = extra.get('post_count', 0)
+        comment_count = extra.get('comment_count', 0)
+
+        if post_count > 100:
+            lemmy_score += 15
+        elif post_count > 50:
+            lemmy_score += 10
+        elif post_count > 10:
+            lemmy_score += 5
+
+        if comment_count > 500:
+            lemmy_score += 10
+        elif comment_count > 100:
+            lemmy_score += 5
+
+        if lemmy_score > 0:
+            activity_scores['lemmy'] = {'score': lemmy_score, 'info': lemmy_username}
+
     # pick highest activity platform
     if activity_scores:
         best_platform = max(activity_scores.items(), key=lambda x: x[1]['score'])
