@@ -1,6 +1,8 @@
 """config flow for connectd integration."""
 from __future__ import annotations
 
+import logging
+
 import aiohttp
 import voluptuous as vol
 
@@ -8,8 +10,9 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
 
-from . import DOMAIN
+_LOGGER = logging.getLogger(__name__)
 
+DOMAIN = "connectd"
 DEFAULT_PORT = 8099
 
 
@@ -30,9 +33,10 @@ class ConnectdConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # test connection
             try:
-                async with aiohttp.ClientSession() as session:
+                timeout = aiohttp.ClientTimeout(total=10)
+                async with aiohttp.ClientSession(timeout=timeout) as session:
                     url = f"http://{host}:{port}/api/health"
-                    async with session.get(url, timeout=5) as resp:
+                    async with session.get(url) as resp:
                         if resp.status == 200:
                             # connection works
                             await self.async_set_unique_id(f"{host}:{port}")
@@ -46,10 +50,13 @@ class ConnectdConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                                 },
                             )
                         else:
+                            _LOGGER.error("connectd api returned status %s", resp.status)
                             errors["base"] = "cannot_connect"
-            except aiohttp.ClientError:
+            except aiohttp.ClientError as err:
+                _LOGGER.error("connectd connection error: %s", err)
                 errors["base"] = "cannot_connect"
-            except Exception:
+            except Exception as err:
+                _LOGGER.exception("connectd unexpected error: %s", err)
                 errors["base"] = "unknown"
 
         return self.async_show_form(

@@ -1,0 +1,72 @@
+name: connectd
+version: "1.1.0"
+slug: connectd
+description: "find isolated builders with aligned values. auto-discover humans on github, mastodon, lemmy, discord, and more."
+url: "https://github.com/sudoxnym/connectd"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+startup: application
+boot: auto
+ports:
+  8099/tcp: 8099
+ports_description:
+  8099/tcp: "connectd API (for HACS integration)"
+map:
+  - config:rw
+options:
+  host_user: ""
+  host_name: ""
+  host_email: ""
+  host_mastodon: ""
+  host_reddit: ""
+  host_lemmy: ""
+  host_lobsters: ""
+  host_matrix: ""
+  host_discord: ""
+  host_bluesky: ""
+  host_location: ""
+  host_interests: ""
+  host_looking_for: ""
+  github_token: ""
+  groq_api_key: ""
+  mastodon_token: ""
+  mastodon_instance: ""
+  discord_bot_token: ""
+  discord_target_servers: ""
+  lemmy_instance: ""
+  lemmy_username: ""
+  lemmy_password: ""
+  smtp_host: ""
+  smtp_port: 465
+  smtp_user: ""
+  smtp_pass: ""
+schema:
+  host_user: str?
+  host_name: str?
+  host_email: email?
+  host_mastodon: str?
+  host_reddit: str?
+  host_lemmy: str?
+  host_lobsters: str?
+  host_matrix: str?
+  host_discord: str?
+  host_bluesky: str?
+  host_location: str?
+  host_interests: str?
+  host_looking_for: str?
+  github_token: str?
+  groq_api_key: str?
+  mastodon_token: str?
+  mastodon_instance: str?
+  discord_bot_token: str?
+  discord_target_servers: str?
+  lemmy_instance: str?
+  lemmy_username: str?
+  lemmy_password: str?
+  smtp_host: str?
+  smtp_port: int?
+  smtp_user: str?
+  smtp_pass: str?
+image: sudoxreboot/connectd-addon-{arch}

@@ -1,0 +1,11 @@
+build_from:
+  amd64: ghcr.io/hassio-addons/base:15.0.8
+  aarch64: ghcr.io/hassio-addons/base:15.0.8
+  armv7: ghcr.io/hassio-addons/base:15.0.8
+labels:
+  org.opencontainers.image.title: "connectd"
+  org.opencontainers.image.description: "find isolated builders with aligned values"
+  org.opencontainers.image.source: "https://github.com/sudoxnym/connectd"
+  org.opencontainers.image.licenses: "MIT"
+args:
+  BUILD_ARCH: amd64

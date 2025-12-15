@@ -1,11 +1,11 @@
 """connectd integration for home assistant."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import timedelta
 
 import aiohttp
-import async_timeout
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -62,7 +62,7 @@ class ConnectdDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """fetch data from connectd api."""
         try:
-            async with async_timeout.timeout(10):
+            async with asyncio.timeout(10):
                 async with aiohttp.ClientSession() as session:
                     # get stats
                     async with session.get(f"{self.base_url}/api/stats") as resp:
@@ -76,7 +76,40 @@ class ConnectdDataUpdateCoordinator(DataUpdateCoordinator):
                             raise UpdateFailed(f"error fetching state: {resp.status}")
                         state = await resp.json()
 
-                    return {"stats": stats, "state": state}
+                    # get priority matches (optional)
+                    priority_matches = {}
+                    try:
+                        async with session.get(f"{self.base_url}/api/priority_matches") as resp:
+                            if resp.status == 200:
+                                priority_matches = await resp.json()
+                    except Exception:
+                        pass
+
+                    # get top humans (optional)
+                    top_humans = {}
+                    try:
+                        async with session.get(f"{self.base_url}/api/top_humans") as resp:
+                            if resp.status == 200:
+                                top_humans = await resp.json()
+                    except Exception:
+                        pass
+
+                    # get user info (optional)
+                    user = {}
+                    try:
+                        async with session.get(f"{self.base_url}/api/user") as resp:
+                            if resp.status == 200:
+                                user = await resp.json()
+                    except Exception:
+                        pass
+
+                    return {
+                        "stats": stats,
+                        "state": state,
+                        "priority_matches": priority_matches,
+                        "top_humans": top_humans,
+                        "user": user,
+                    }
 
         except aiohttp.ClientError as err:
             raise UpdateFailed(f"error communicating with connectd: {err}")
