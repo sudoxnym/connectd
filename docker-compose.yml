@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    ports:
+      - "8099:8099"
     volumes:
       - ./data:/app/data
       - ./db:/app/db

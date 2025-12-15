@@ -30,6 +30,7 @@ from introd.lost_intro import draft_lost_intro, get_lost_intro_config
 from introd.send import send_email
 from introd.deliver import deliver_intro, determine_best_contact
 from config import get_lost_config
+from api import start_api_thread, update_daemon_state
 
 # daemon config
 SCOUT_INTERVAL = 3600 * 4      # full scout every 4 hours
@@ -59,9 +60,27 @@ class ConnectDaemon:
         signal.signal(signal.SIGINT, self._shutdown)
         signal.signal(signal.SIGTERM, self._shutdown)
 
+        # update API state
+        self._update_api_state()
+
     def _shutdown(self, signum, frame):
         print("\nconnectd: shutting down...")
         self.running = False
+        self._update_api_state()
+
+    def _update_api_state(self):
+        """update API state for HA integration"""
+        update_daemon_state({
+            'running': self.running,
+            'dry_run': self.dry_run,
+            'last_scout': self.last_scout.isoformat() if self.last_scout else None,
+            'last_match': self.last_match.isoformat() if self.last_match else None,
+            'last_intro': self.last_intro.isoformat() if self.last_intro else None,
+            'last_lost': self.last_lost.isoformat() if self.last_lost else None,
+            'intros_today': self.intros_today,
+            'lost_intros_today': self.lost_intros_today,
+            'started_at': datetime.now().isoformat(),
+        })
 
     def log(self, msg):
         """timestamped log"""
@@ -447,6 +466,11 @@ class ConnectDaemon:
     def run(self):
         """main daemon loop"""
         self.log("connectd daemon starting...")
+
+        # start API server
+        start_api_thread()
+        self.log("api server started on port 8099")
+
         if self.dry_run:
             self.log("*** DRY RUN MODE - no intros will be sent ***")
         self.log(f"scout interval: {SCOUT_INTERVAL}s")
@@ -457,6 +481,7 @@ class ConnectDaemon:
 
         # initial scout
         self.scout_cycle()
+        self._update_api_state()
 
         while self.running:
             now = datetime.now()
@@ -464,19 +489,23 @@ class ConnectDaemon:
             # scout cycle
             if not self.last_scout or (now - self.last_scout).seconds >= SCOUT_INTERVAL:
                 self.scout_cycle()
+                self._update_api_state()
 
             # match cycle
             if not self.last_match or (now - self.last_match).seconds >= MATCH_INTERVAL:
                 self.match_priority_users()
                 self.match_strangers()
+                self._update_api_state()
 
             # intro cycle
             if not self.last_intro or (now - self.last_intro).seconds >= INTRO_INTERVAL:
                 self.send_stranger_intros()
+                self._update_api_state()
 
             # lost builder cycle
             if not self.last_lost or (now - self.last_lost).seconds >= LOST_INTERVAL:
                 self.send_lost_builder_intros()
+                self._update_api_state()
 
             # sleep between checks
             time.sleep(60)

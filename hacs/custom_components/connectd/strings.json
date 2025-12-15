@@ -1,0 +1,18 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "connectd daemon",
+        "description": "connect to your connectd daemon for monitoring.",
+        "data": {
+          "host": "host",
+          "port": "port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "failed to connect to connectd api",
+      "unknown": "unexpected error"
+    }
+  }
+}
