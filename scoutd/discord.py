@@ -27,9 +27,39 @@ from .lost import (
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN', '')
 DISCORD_API = 'https://discord.com/api/v10'
 
-# server IDs to scout (add your own)
-# these are public programming/career servers
-TARGET_SERVERS = os.environ.get('DISCORD_TARGET_SERVERS', '').split(',')
+# default server IDs - values-aligned communities
+# bot must be invited to these servers to scout them
+# invite links for reference (use numeric IDs below):
+#   - self-hosted: discord.gg/self-hosted
+#   - foss-dev: discord.gg/foss-developers-group
+#   - grapheneos: discord.gg/grapheneos
+#   - queer-coded: discord.me/queer-coded
+#   - homelab: discord.gg/homelab
+#   - esphome: discord.gg/n9sdw7pnsn
+#   - home-assistant: discord.gg/home-assistant
+#   - linuxserver: discord.gg/linuxserver
+#   - proxmox-scripts: discord.gg/jsYVk5JBxq
+DEFAULT_SERVERS = [
+    # self-hosted / foss / privacy
+    '693469700109369394',   # self-hosted (selfhosted.show)
+    '920089648842293248',   # foss developers group
+    '1176414688112820234',  # grapheneos
+
+    # queer tech
+    '925804557001437184',   # queer coded
+
+    # home automation / homelab
+    # note: these are large servers, bot needs to be invited
+    # '330944238910963714',  # home assistant (150k+ members)
+    # '429907082951524364',  # esphome (35k members)
+    # '478094546522079232',  # homelab (35k members)
+    # '354974912613449730',  # linuxserver.io (41k members)
+]
+
+# merge env var servers with defaults
+_env_servers = os.environ.get('DISCORD_TARGET_SERVERS', '').split(',')
+_env_servers = [s.strip() for s in _env_servers if s.strip()]
+TARGET_SERVERS = list(set(DEFAULT_SERVERS + _env_servers))
 
 # channels to focus on (keywords in channel name)
 TARGET_CHANNEL_KEYWORDS = [
