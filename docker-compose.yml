@@ -1,0 +1,14 @@
+services:
+  connectd:
+    image: sudoxnym/connectd:latest
+    container_name: connectd
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./db:/app/db
+    # daemon runs continuously by default
+    # for one-shot or dry-run, override command:
+    # command: ["python", "daemon.py", "--dry-run"]
+    # command: ["python", "cli.py", "scout"]
