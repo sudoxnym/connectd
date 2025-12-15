@@ -3,12 +3,14 @@ connectd database layer
 sqlite storage for humans, fingerprints, matches, intros
 """
 
+import os
 import sqlite3
 import json
 from datetime import datetime
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / 'connectd.db'
+# use env var for DB path (docker) or default to local
+DB_PATH = Path(os.environ.get('DB_PATH', Path(__file__).parent / 'connectd.db'))
 
 
 class Database:

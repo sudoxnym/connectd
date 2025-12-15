@@ -1,6 +1,6 @@
 services:
   connectd:
-    image: sudoxnym/connectd:latest
+    image: sudoxreboot/connectd:latest
     container_name: connectd
     restart: unless-stopped
     env_file:
