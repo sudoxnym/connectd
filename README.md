@@ -1,5 +1,9 @@
 # connectd
 
+<p align="center">
+  <img src="connectd_logo.png" alt="connectd logo" width="300">
+</p>
+
 a daemon that finds isolated builders with aligned values and connects them.
 
 **this is not networking. this is community building.**
