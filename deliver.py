@@ -147,6 +147,87 @@ def create_github_issue(owner, repo, title, body, dry_run=False):
         return False, str(e)
 
 
+def create_forge_issue(platform_type, instance_url, owner, repo, title, body, dry_run=False):
+    """
+    create issue on self-hosted git forge.
+    supports gitea/forgejo/gogs (same API) and gitlab.
+    """
+    from config import CODEBERG_TOKEN, GITEA_TOKENS, GITLAB_TOKENS
+
+    if dry_run:
+        print(f"  [dry run] would create issue on {platform_type}:{instance_url}/{owner}/{repo}")
+        return True, None
+
+    try:
+        if platform_type in ('gitea', 'forgejo', 'gogs'):
+            # get token for this instance
+            token = None
+            if 'codeberg.org' in instance_url:
+                token = CODEBERG_TOKEN
+            else:
+                token = GITEA_TOKENS.get(instance_url)
+
+            if not token:
+                return False, f"no auth token for {instance_url}"
+
+            # gitea API
+            api_url = f"{instance_url}/api/v1/repos/{owner}/{repo}/issues"
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'token {token}'
+            }
+            data = {'title': title, 'body': body}
+
+            resp = requests.post(api_url, headers=headers, json=data, timeout=15)
+            if resp.status_code in (200, 201):
+                return True, resp.json().get('html_url')
+            else:
+                return False, f"gitea api error: {resp.status_code} - {resp.text[:200]}"
+
+        elif platform_type == 'gitlab':
+            token = GITLAB_TOKENS.get(instance_url)
+            if not token:
+                return False, f"no auth token for {instance_url}"
+
+            # need to get project ID first
+            search_url = f"{instance_url}/api/v4/projects"
+            headers = {'PRIVATE-TOKEN': token}
+            params = {'search': repo}
+
+            resp = requests.get(search_url, headers=headers, params=params, timeout=15)
+            if resp.status_code != 200:
+                return False, f"gitlab project lookup failed: {resp.status_code}"
+
+            projects = resp.json()
+            project_id = None
+            for p in projects:
+                if p.get('path') == repo or p.get('name') == repo:
+                    project_id = p.get('id')
+                    break
+
+            if not project_id:
+                return False, f"project {repo} not found"
+
+            # create issue
+            issue_url = f"{instance_url}/api/v4/projects/{project_id}/issues"
+            data = {'title': title, 'description': body}
+            resp = requests.post(issue_url, headers=headers, json=data, timeout=15)
+
+            if resp.status_code in (200, 201):
+                return True, resp.json().get('web_url')
+            else:
+                return False, f"gitlab api error: {resp.status_code}"
+
+        elif platform_type == 'sourcehut':
+            return False, "sourcehut uses mailing lists - use email instead"
+
+        else:
+            return False, f"unknown forge type: {platform_type}"
+
+    except Exception as e:
+        return False, str(e)
+
+
 def send_mastodon_dm(recipient_acct, message, dry_run=False):
     """send mastodon direct message"""
     if not MASTODON_TOKEN:
@@ -419,14 +500,94 @@ def deliver_intro(match_data, intro_draft, subject=None, dry_run=False):
 """
         success, error = create_github_issue(owner, repo, title, github_body, dry_run)
 
+    elif method == 'forge_issue':
+        # self-hosted git forge issue (gitea/forgejo/gitlab/sourcehut)
+        platform_type = contact_info.get('platform_type')
+        instance_url = contact_info.get('instance_url')
+        owner = contact_info.get('owner')
+        repo = contact_info.get('repo')
+        title = subject or "community introduction from connectd"
+
+        # get the other person's contact info for bidirectional link
+        sender = match_data.get('human_a', {})
+        sender_name = sender.get('name') or sender.get('username') or 'someone'
+        sender_platform = sender.get('platform', '')
+        sender_url = sender.get('url', '')
+
+        if not sender_url:
+            if sender_platform == 'github':
+                sender_url = f"https://github.com/{sender.get('username')}"
+            elif sender_platform == 'mastodon':
+                sender_url = f"https://fosstodon.org/@{sender.get('username')}"
+            elif ':' in sender_platform:  # forge platform
+                extra = sender.get('extra', {})
+                if isinstance(extra, str):
+                    import json as _json
+                    extra = _json.loads(extra) if extra else {}
+                sender_url = extra.get('instance_url', '') + '/' + sender.get('username', '')
+
+        forge_body = f"""hey {recipient.get('name') or recipient.get('username')},
+
+{intro_draft}
+
+**reach them at:** {sender_url or 'see their profile'}
+
+---
+*this is an automated introduction from [connectd](https://github.com/connectd-daemon) - a daemon that finds isolated builders with aligned values and connects them.*
+
+*if this feels spammy, close this issue and we won't reach out again.*
+"""
+        success, error = create_forge_issue(platform_type, instance_url, owner, repo, title, forge_body, dry_run)
+
     elif method == 'manual':
         # skip - no longer using manual queue
         success = False
         error = "manual method deprecated - skipping"
 
+    # FALLBACK CHAIN: if primary method failed, try fallbacks
+    if not success and fallbacks:
+        for fallback_method, fallback_info in fallbacks:
+            result['fallback_attempts'] = result.get('fallback_attempts', [])
+            result['fallback_attempts'].append({'method': fallback_method})
+
+            fb_success = False
+            fb_error = None
+
+            if fallback_method == 'email':
+                fb_success, fb_error = send_email(fallback_info, email_subject, intro_draft, dry_run)
+            elif fallback_method == 'mastodon':
+                fb_success, fb_error = send_mastodon_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'bluesky':
+                fb_success, fb_error = send_bluesky_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'matrix':
+                fb_success, fb_error = send_matrix_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'github_issue':
+                owner = fallback_info.get('owner') if isinstance(fallback_info, dict) else fallback_info.split('/')[0]
+                repo = fallback_info.get('repo') if isinstance(fallback_info, dict) else fallback_info.split('/')[1]
+                fb_success, fb_error = create_github_issue(owner, repo, email_subject, intro_draft, dry_run)
+            elif fallback_method == 'forge_issue':
+                fb_success, fb_error = create_forge_issue(
+                    fallback_info.get('platform_type'),
+                    fallback_info.get('instance_url'),
+                    fallback_info.get('owner'),
+                    fallback_info.get('repo'),
+                    email_subject, intro_draft, dry_run
+                )
+
+            if fb_success:
+                success = True
+                method = fallback_method
+                contact_info = fallback_info
+                error = None
+                result['fallback_succeeded'] = fallback_method
+                break
+            else:
+                result['fallback_attempts'][-1]['error'] = fb_error
+
     # log result
     result['success'] = success
     result['error'] = error
+    result['final_method'] = method
 
     if success:
         log['sent'].append(result)

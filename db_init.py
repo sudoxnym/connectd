@@ -183,7 +183,7 @@ class Database:
         row = c.fetchone()
         return dict(row) if row else None
 
-    def get_all_humans(self, min_score=0, limit=1000):
+    def get_all_humans(self, min_score=0, limit=100000):
         """get all humans above score threshold"""
         c = self.conn.cursor()
         c.execute('''SELECT * FROM humans
@@ -373,3 +373,64 @@ class Database:
 
     def close(self):
         self.conn.close()
+
+    def purge_disqualified(self):
+        """
+        auto-cleanup: remove all matches/intros involving users with disqualifying signals
+        DISQUALIFYING: maga, conspiracy, conservative, antivax, sovcit
+        """
+        c = self.conn.cursor()
+        purged = {}
+        
+        # patterns to match disqualifying signals
+        disq_patterns = ["maga", "conspiracy", "conservative", "antivax", "sovcit"]
+        
+        # build WHERE clause for negative_signals check
+        neg_check = " OR ".join([f"negative_signals LIKE '%{p}%'" for p in disq_patterns])
+        
+        # 1. delete from intros where recipient is disqualified
+        c.execute(f"""
+            DELETE FROM intros WHERE recipient_human_id IN (
+                SELECT id FROM humans WHERE {neg_check}
+            )
+        """)
+        purged["intros"] = c.rowcount
+        
+        # 2. delete from priority_matches where matched_human is disqualified
+        c.execute(f"""
+            DELETE FROM priority_matches WHERE matched_human_id IN (
+                SELECT id FROM humans WHERE {neg_check}
+            )
+        """)
+        purged["priority_matches"] = c.rowcount
+        
+        # 3. delete from matches where either human is disqualified
+        c.execute(f"""
+            DELETE FROM matches WHERE 
+                human_a_id IN (SELECT id FROM humans WHERE {neg_check})
+                OR human_b_id IN (SELECT id FROM humans WHERE {neg_check})
+        """)
+        purged["matches"] = c.rowcount
+        
+        # 4. cleanup orphaned records (humans deleted but refs remain)
+        c.execute("""
+            DELETE FROM matches WHERE 
+                NOT EXISTS (SELECT 1 FROM humans h WHERE h.id = human_a_id)
+                OR NOT EXISTS (SELECT 1 FROM humans h WHERE h.id = human_b_id)
+        """)
+        purged["orphaned_matches"] = c.rowcount
+        
+        c.execute("""
+            DELETE FROM priority_matches WHERE 
+                NOT EXISTS (SELECT 1 FROM humans h WHERE h.id = matched_human_id)
+        """)
+        purged["orphaned_priority"] = c.rowcount
+        
+        c.execute("""
+            DELETE FROM intros WHERE 
+                NOT EXISTS (SELECT 1 FROM humans h WHERE h.id = recipient_human_id)
+        """)
+        purged["orphaned_intros"] = c.rowcount
+        
+        self.conn.commit()
+        return purged

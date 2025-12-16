@@ -21,3 +21,7 @@ services:
       - ./api.py:/app/api.py:ro
       - ./deliver.py:/app/introd/deliver.py:ro
       - ./soul.txt:/app/soul.txt:ro
+      - ./scoutd/reddit.py:/app/scoutd/reddit.py:ro
+      - ./matchd/overlap.py:/app/matchd/overlap.py:ro
+      - ./central_client.py:/app/central_client.py:ro
+      - ./scoutd/forges.py:/app/scoutd/forges.py:ro

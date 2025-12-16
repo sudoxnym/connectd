@@ -116,6 +116,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <div id="queue" class="pnl"></div>
     <div id="sent" class="pnl"></div>
     <div id="failed" class="pnl"></div>
+    <div id="lost" class="pnl"></div>
 
 <script>
 var currentTab = 'host';
@@ -130,7 +131,8 @@ function initTabs() {
         {id: 'host', label: 'you'},
         {id: 'queue', label: 'queue'},
         {id: 'sent', label: 'sent'},
-        {id: 'failed', label: 'failed'}
+        {id: 'failed', label: 'failed'},
+        {id: 'lost', label: 'lost builders'}
     ];
 
     tabs.forEach(function(t) {
@@ -319,6 +321,31 @@ async function loadFailed() {
 
     $('failed').innerHTML = html;
 }
+async function loadLost() {
+    var res = await fetch("/api/lost_builders");
+    var data = await res.json();
+
+    var html = "<h2>lost builders (" + (data.total || 0) + ")</h2>";
+    html += "<p style=\"color:#c792ea;font-size:0.8em;margin-bottom:10px\">people who need to see that someone like them made it</p>";
+
+    if (!data.matches || data.matches.length === 0) {
+        html += "<div class=\"meta\">no lost builders found</div>";
+    }
+
+    for (var i = 0; i < (data.matches || []).length; i++) {
+        var m = data.matches[i];
+        html += "<div class=\"card\">";
+        html += "<div class=\"card-hdr\"><span class=\"to\">LOST: " + m.lost_user + "</span><span class=\"score\">" + m.match_score + "</span></div>";
+        html += "<div class=\"meta\">lost: " + m.lost_score + " | values: " + m.values_score + "</div>";
+        html += "<div class=\"meta\" style=\"color:#0f8\">BUILDER: " + m.builder + " (" + m.builder_platform + ")</div>";
+        html += "<div class=\"meta\">score: " + m.builder_score + " | repos: " + m.builder_repos + " | stars: " + m.builder_stars + "</div>";
+        html += "<div class=\"meta\">shared: " + (m.shared || []).join(", ") + "</div>";
+        html += "</div>";
+    }
+
+    $("lost").innerHTML = html;
+}
+
 
 function load() {
     loadStats();
@@ -326,6 +353,7 @@ function load() {
     loadQueue();
     loadSent();
     loadFailed();
+    loadLost();
 }
 
 document.addEventListener('click', function(e) {
@@ -438,6 +466,8 @@ class APIHandler(BaseHTTPRequestHandler):
             self._handle_top_humans()
         elif path == '/api/user':
             self._handle_user()
+        elif path == '/api/lost_builders':
+            self._handle_lost_builders()
         else:
             self._send_json({'error': 'not found'}, 404)
     def _handle_favicon(self):
@@ -1167,6 +1197,44 @@ class APIHandler(BaseHTTPRequestHandler):
                 'match_count': len(matches),
                 'new_match_count': sum(1 for m in matches if m.get('status') == 'new'),
             })
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
+
+
+    def _handle_lost_builders(self):
+        """return lost builders with their inspiring matches"""
+        try:
+            from matchd.lost import find_matches_for_lost_builders
+            db = Database()
+            matches, error = find_matches_for_lost_builders(db, min_lost_score=30, min_values_score=15, limit=50)
+            
+            result = {
+                'total': len(matches) if matches else 0,
+                'error': error,
+                'matches': []
+            }
+            
+            if matches:
+                for m in matches:
+                    lost = m.get('lost_user', {})
+                    builder = m.get('inspiring_builder', {})
+                    result['matches'].append({
+                        'lost_user': lost.get('username'),
+                        'lost_platform': lost.get('platform'),
+                        'lost_score': lost.get('lost_potential_score', 0),
+                        'values_score': lost.get('score', 0),
+                        'builder': builder.get('username'),
+                        'builder_platform': builder.get('platform'),
+                        'builder_score': builder.get('score', 0),
+                        'builder_repos': m.get('builder_repos', 0),
+                        'builder_stars': m.get('builder_stars', 0),
+                        'match_score': m.get('match_score', 0),
+                        'shared': m.get('shared_interests', [])[:5],
+                    })
+            
+            db.close()
+            self._send_json(result)
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
 

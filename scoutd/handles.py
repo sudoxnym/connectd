@@ -103,6 +103,15 @@ PLATFORM_PATTERNS = {
     'devto': [
         (r'https?://dev\.to/([^/?#]+)', lambda m: m.group(1)),
     ],
+    # reddit/lobsters
+    'reddit': [
+        (r'https?://(?:www\.)?reddit\.com/u(?:ser)?/([^/?#]+)', lambda m: f"u/{m.group(1)}"),
+        (r'https?://(?:old|new)\.reddit\.com/u(?:ser)?/([^/?#]+)', lambda m: f"u/{m.group(1)}"),
+    ],
+    'lobsters': [
+        (r'https?://lobste\.rs/u/([^/?#]+)', lambda m: m.group(1)),
+    ],
+
 
     # funding
     'kofi': [

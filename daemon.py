@@ -12,6 +12,7 @@ runs continuously, respects rate limits, sends intros automatically
 import time
 import json
 import signal
+import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -20,13 +21,14 @@ from db import Database
 from db.users import (init_users_table, get_priority_users, save_priority_match,
                       get_priority_user_matches, discover_host_user)
 from scoutd import scrape_github, scrape_reddit, scrape_mastodon, scrape_lobsters, scrape_lemmy, scrape_discord
-from config import HOST_USER, INTRO_INTERVAL, MAX_INTROS_PER_DAY, SCOUT_INTERVAL, MATCH_INTERVAL
+from scoutd.forges import scrape_all_forges
+from config import HOST_USER
 from scoutd.github import analyze_github_user, get_github_user
 from scoutd.signals import analyze_text
 from matchd.fingerprint import generate_fingerprint, fingerprint_similarity
 from matchd.overlap import find_overlap
 from matchd.lost import find_matches_for_lost_builders
-from introd.groq_draft import draft_intro_with_llm as draft_intro
+from introd.draft import draft_intro, summarize_human, summarize_overlap
 from introd.lost_intro import draft_lost_intro, get_lost_intro_config
 from introd.send import send_email
 from introd.deliver import deliver_intro, determine_best_contact
@@ -34,7 +36,19 @@ from config import get_lost_config
 from api import start_api_thread, update_daemon_state
 
 # daemon config
+SCOUT_INTERVAL = 3600 * 4      # full scout every 4 hours
+MATCH_INTERVAL = 3600          # check matches every hour
+INTRO_INTERVAL = 3600 * 2      # send intros every 2 hours
 LOST_INTERVAL = 3600 * 6       # lost builder outreach every 6 hours (lower volume)
+from config import MAX_INTROS_PER_DAY
+
+# central coordination (optional - for distributed instances)
+try:
+    from central_client import CentralClient
+    CENTRAL_ENABLED = bool(os.environ.get('CONNECTD_API_KEY'))
+except ImportError:
+    CENTRAL_ENABLED = False
+    CentralClient = None  # from config.py
 MIN_OVERLAP_PRIORITY = 30      # min score for priority user matches
 MIN_OVERLAP_STRANGERS = 50     # higher bar for stranger intros
 
@@ -43,6 +57,9 @@ class ConnectDaemon:
     def __init__(self, dry_run=False):
         self.db = Database()
         init_users_table(self.db.conn)
+        purged = self.db.purge_disqualified()
+        if any(purged.values()):
+            self.log(f"purged disqualified: {purged}")
         self.running = True
         self.dry_run = dry_run
         self.started_at = datetime.now()
@@ -52,6 +69,18 @@ class ConnectDaemon:
         self.last_lost = None
         self.intros_today = 0
         self.lost_intros_today = 0
+
+        # central coordination
+        self.central = None
+        if CENTRAL_ENABLED:
+            try:
+                self.central = CentralClient()
+                instance_id = os.environ.get('CONNECTD_INSTANCE_ID', 'unknown')
+                self.central.register_instance(instance_id, os.environ.get('CONNECTD_INSTANCE_IP', 'unknown'))
+                self.log(f"connected to central API as {instance_id}")
+            except Exception as e:
+                self.log(f"central API unavailable: {e}")
+                self.central = None
         self.today = datetime.now().date()
 
         # handle shutdown gracefully
@@ -108,6 +137,18 @@ class ConnectDaemon:
             self.today = datetime.now().date()
             self.intros_today = 0
             self.lost_intros_today = 0
+
+        # central coordination
+        self.central = None
+        if CENTRAL_ENABLED:
+            try:
+                self.central = CentralClient()
+                instance_id = os.environ.get('CONNECTD_INSTANCE_ID', 'unknown')
+                self.central.register_instance(instance_id, os.environ.get('CONNECTD_INSTANCE_IP', 'unknown'))
+                self.log(f"connected to central API as {instance_id}")
+            except Exception as e:
+                self.log(f"central API unavailable: {e}")
+                self.central = None
             self.log("reset daily intro limits")
 
     def scout_cycle(self):
@@ -126,6 +167,16 @@ class ConnectDaemon:
 
         try:
             scrape_mastodon(self.db, limit_per_instance=30)
+
+            # scrape self-hosted git forges (highest signal)
+            self.log("scraping self-hosted git forges...")
+            try:
+                forge_humans = scrape_all_forges(limit_per_instance=30)
+                for h in forge_humans:
+                    self.db.upsert_human(h)
+                self.log(f"  forges: {len(forge_humans)} humans")
+            except Exception as e:
+                self.log(f"  forge scrape error: {e}")
         except Exception as e:
             self.log(f"mastodon scout error: {e}")
 
@@ -157,7 +208,7 @@ class ConnectDaemon:
 
         self.log(f"matching for {len(priority_users)} priority users...")
 
-        humans = self.db.get_all_humans(min_score=20, limit=500)
+        humans = self.db.get_all_humans(min_score=20)
 
         for puser in priority_users:
             # build priority user's fingerprint from their linked profiles
@@ -230,7 +281,7 @@ class ConnectDaemon:
         """find matches between discovered humans (altruistic)"""
         self.log("matching strangers...")
 
-        humans = self.db.get_all_humans(min_score=40, limit=200)
+        humans = self.db.get_all_humans(min_score=40)
 
         if len(humans) < 2:
             return
@@ -256,7 +307,7 @@ class ConnectDaemon:
 
             overlap = find_overlap(human_a, human_b, fp_a, fp_b)
 
-            if overlap['overlap_score'] >= MIN_OVERLAP_STRANGERS:
+            if overlap and overlap["overlap_score"] >= MIN_OVERLAP_STRANGERS:
                 # save match
                 self.db.save_match(human_a['id'], human_b['id'], overlap)
                 matches_found += 1
@@ -265,6 +316,37 @@ class ConnectDaemon:
             self.log(f"found {matches_found} stranger matches")
 
         self.last_match = datetime.now()
+
+    def claim_from_central(self, human_id, match_id=None, outreach_type='intro'):
+        """claim outreach from central - returns outreach_id or None if already claimed"""
+        if not self.central:
+            return -1  # local mode, always allow
+        try:
+            return self.central.claim_outreach(human_id, match_id, outreach_type)
+        except Exception as e:
+            self.log(f"central claim error: {e}")
+            return -1  # allow local if central fails
+
+    def complete_on_central(self, outreach_id, status, sent_via=None, draft=None, error=None):
+        """mark outreach complete on central"""
+        if not self.central or outreach_id == -1:
+            return
+        try:
+            self.central.complete_outreach(outreach_id, status, sent_via, draft, error)
+        except Exception as e:
+            self.log(f"central complete error: {e}")
+
+    def sync_to_central(self, humans=None, matches=None):
+        """sync local data to central"""
+        if not self.central:
+            return
+        try:
+            if humans:
+                self.central.upsert_humans_bulk(humans)
+            if matches:
+                self.central.create_matches_bulk(matches)
+        except Exception as e:
+            self.log(f"central sync error: {e}")
 
     def send_stranger_intros(self):
         """send intros to connect strangers (or preview in dry-run mode)"""
@@ -331,29 +413,18 @@ class ConnectDaemon:
                 'overlap_reasons': match['overlap_reasons'],
             }
 
-            # ACTIVITY-BASED CONTACT SELECTION
-            # use deliver_intro which calls determine_best_contact
-            # picks method based on WHERE they're most active:
-            # - mastodon DM if active on fediverse
-            # - github issue if actively committing
-            # - email ONLY as last resort
-
+            # try to send intro to person with email
             for recipient, other in [(human_a, human_b), (human_b, human_a)]:
-                # draft intro using groq LLM
-                # retry groq up to 3 times with 10s wait
-                intro_result, intro_error = None, None
-                for retry in range(3):
-                    intro_result, intro_error = draft_intro(match_data, recipient='a' if recipient == human_a else 'b')
-                    if not intro_error:
-                        break
-                    self.log(f"groq retry {retry+1}/3: {intro_error}")
-                    import time
-                    time.sleep(10)
-                
-                if intro_error:
-                    self.log(f"failed to draft intro after retries: {intro_error}")
+                contact = recipient.get('contact', {})
+                if isinstance(contact, str):
+                    contact = json.loads(contact)
+
+                email = contact.get('email')
+                if not email:
                     continue
-                intro = {'draft': intro_result.get('draft', '')}
+
+                # draft intro
+                intro = draft_intro(match_data, recipient='a' if recipient == human_a else 'b')
 
                 # parse overlap reasons for display
                 reasons = match['overlap_reasons']
@@ -361,13 +432,12 @@ class ConnectDaemon:
                     reasons = json.loads(reasons)
                 reason_summary = ', '.join(reasons[:3]) if reasons else 'aligned values'
 
-                # determine best contact method based on activity
-                method, contact_info = determine_best_contact(recipient)
-
                 if self.dry_run:
+                    # print preview
                     print("\n" + "=" * 60)
                     print(f"TO: {recipient['username']} ({recipient['platform']})")
-                    print(f"METHOD: {method} -> {contact_info}")
+                    print(f"EMAIL: {email}")
+                    print(f"SUBJECT: you might want to meet {other['username']}")
                     print(f"SCORE: {match['overlap_score']:.0f} ({reason_summary})")
                     print("-" * 60)
                     print("MESSAGE:")
@@ -377,12 +447,23 @@ class ConnectDaemon:
                     print("=" * 60)
                     break
                 else:
-                    # deliver via activity-based method selection
-                    success, error, delivery_method = deliver_intro(match_data, intro['draft'], intro.get('subject'))
+                    # claim from central first
+                    outreach_id = self.claim_from_central(recipient['id'], match['id'], 'intro')
+                    if outreach_id is None:
+                        self.log(f"skipping {recipient['username']} - already claimed by another instance")
+                        continue
+
+                    # actually send
+                    success, error = send_email(
+                        email,
+                        f"connectd: you might want to meet {other['username']}",
+                        intro['draft']
+                    )
 
                     if success:
-                        self.log(f"sent intro to {recipient['username']} via {delivery_method}")
+                        self.log(f"sent intro to {recipient['username']} ({email})")
                         self.intros_today += 1
+                        self.complete_on_central(outreach_id, 'sent', 'email', intro['draft'])
 
                         # mark match as intro_sent
                         c.execute('UPDATE matches SET status = "intro_sent" WHERE id = ?',
@@ -390,7 +471,8 @@ class ConnectDaemon:
                         self.db.conn.commit()
                         break
                     else:
-                        self.log(f"failed to reach {recipient['username']} via {delivery_method}: {error}")
+                        self.log(f"failed to send to {email}: {error}")
+                        self.complete_on_central(outreach_id, 'failed', error=error)
 
         self.last_intro = datetime.now()
 
@@ -475,7 +557,7 @@ class ConnectDaemon:
                     'overlap_reasons': match.get('shared_interests', []),
                 }
 
-                success, error, delivery_method = deliver_intro(match_data, draft, None)
+                success, error, delivery_method = deliver_intro(match_data, draft)
 
                 if success:
                     self.log(f"sent lost builder intro to {lost_name} via {delivery_method}")

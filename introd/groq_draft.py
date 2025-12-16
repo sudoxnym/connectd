@@ -104,6 +104,54 @@ def draft_intro_with_llm(match_data: dict, recipient: str = 'a', dry_run: bool =
         about_name = about_person.get('username', 'someone')
         about_bio = about_person.get('extra', {}).get('bio', '')
         
+        # extract contact info for about_person
+        about_extra = about_person.get('extra', {})
+        if isinstance(about_extra, str):
+            import json as _json
+            about_extra = _json.loads(about_extra) if about_extra else {}
+        about_contact = about_person.get('contact', {})
+        if isinstance(about_contact, str):
+            about_contact = _json.loads(about_contact) if about_contact else {}
+        
+        # build contact link for about_person
+        about_platform = about_person.get('platform', '')
+        about_username = about_person.get('username', '')
+        contact_link = None
+        if about_platform == 'mastodon' and about_username:
+            if '@' in about_username:
+                parts = about_username.split('@')
+                if len(parts) >= 2:
+                    contact_link = f"https://{parts[1]}/@{parts[0]}"
+        elif about_platform == 'github' and about_username:
+            contact_link = f"https://github.com/{about_username}"
+        elif about_extra.get('mastodon') or about_contact.get('mastodon'):
+            handle = about_extra.get('mastodon') or about_contact.get('mastodon')
+            if '@' in handle:
+                parts = handle.lstrip('@').split('@')
+                if len(parts) >= 2:
+                    contact_link = f"https://{parts[1]}/@{parts[0]}"
+        elif about_extra.get('github') or about_contact.get('github'):
+            contact_link = f"https://github.com/{about_extra.get('github') or about_contact.get('github')}"
+        elif about_extra.get('email'):
+            contact_link = about_extra['email']
+        elif about_contact.get('email'):
+            contact_link = about_contact['email']
+        elif about_extra.get('website'):
+            contact_link = about_extra['website']
+        elif about_extra.get('external_links', {}).get('website'):
+            contact_link = about_extra['external_links']['website']
+        elif about_extra.get('extra', {}).get('website'):
+            contact_link = about_extra['extra']['website']
+        elif about_platform == 'reddit' and about_username:
+            contact_link = f"reddit.com/u/{about_username}"
+        
+        if not contact_link:
+            contact_link = f"github.com/{about_username}" if about_username else "reach out via connectd"
+        
+        # skip if no real contact method (just reddit or generic)
+        if contact_link.startswith('reddit.com') or contact_link == "reach out via connectd" or 'stackblitz' in contact_link:
+            return None, f"no real contact info for {about_name} - skipping draft"
+        
         # format the shared factors naturally
         if reasons:
             factor = ', '.join(reasons[:3]) if len(reasons) > 1 else reasons[0]
@@ -131,24 +179,20 @@ key facts for this message:
 - introducing them to: {about_name}
 - their shared interests/values: {factor}
 - about {about_name}: {about_bio if about_bio else 'a builder like you'}
+- HOW TO REACH {about_name}: {contact_link}
 
-CRITICAL RULES - DO NOT SANITIZE:
-1. use their name ({to_name}) throughout - make it personal
-2. format the shared factor naturally like "your shared interest in X and Y" or "your work on X"
-3. this message is TO {to_name} ABOUT {about_name} - don't confuse this
-4. keep it lowercase, raw, emotional, real
-5. no corporate speak, no "best regards", no "hi there"
-6. DO NOT water down the message - keep the raw emotional energy
-7. address them directly, call them to action
-8. make them feel seen and not alone
-9. end with rallying energy about building together
+RULES:
+1. say their name ONCE at start, then use "you" 
+2. MUST include how to reach {about_name}: {contact_link}
+3. lowercase, raw, emotional - follow the soul
+4. end with the contact link
 
 return ONLY the message body. signature is added separately."""
 
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.8,
+            temperature=0.6,
             max_tokens=1200
         )
         
@@ -220,3 +264,136 @@ if __name__ == "__main__":
     else:
         print(f"subject: {result['subject']}")
         print(f"\nbody:\n{result['draft_plain']}")
+
+# contact method ranking - USAGE BASED
+# we rank by where the person is MOST ACTIVE, not by our preference
+
+def determine_contact_method(human):
+    """
+    determine ALL available contact methods, ranked by USER'S ACTIVITY.
+    
+    looks at activity metrics to decide where they're most engaged.
+    returns: (best_method, best_info, fallbacks)
+    where fallbacks is a list of (method, info) tuples in activity order
+    """
+    import json
+    
+    extra = human.get('extra', {})
+    contact = human.get('contact', {})
+    
+    if isinstance(extra, str):
+        extra = json.loads(extra) if extra else {}
+    if isinstance(contact, str):
+        contact = json.loads(contact) if contact else {}
+    
+    nested_extra = extra.get('extra', {})
+    platform = human.get('platform', '')
+    
+    available = []
+    
+    # === ACTIVITY SCORING ===
+    # each method gets scored by how active the user is there
+    
+    # EMAIL - always medium priority (we cant measure activity)
+    email = extra.get('email') or contact.get('email') or nested_extra.get('email')
+    if email and '@' in str(email):
+        available.append(('email', email, 50))  # baseline score
+    
+    # MASTODON - score by post count / followers
+    mastodon = extra.get('mastodon') or contact.get('mastodon') or nested_extra.get('mastodon')
+    if mastodon:
+        masto_activity = extra.get('mastodon_posts', 0) or extra.get('statuses_count', 0)
+        masto_score = min(100, 30 + (masto_activity // 10))  # 30 base + 1 per 10 posts
+        available.append(('mastodon', mastodon, masto_score))
+    
+    # if they CAME FROM mastodon, thats their primary
+    if platform == 'mastodon':
+        handle = f"@{human.get('username')}"
+        instance = human.get('instance') or extra.get('instance') or ''
+        if instance:
+            handle = f"@{human.get('username')}@{instance}"
+        activity = extra.get('statuses_count', 0) or extra.get('activity_count', 0)
+        score = min(100, 50 + (activity // 5))  # higher base since its their home
+        # dont dupe
+        if not any(a[0] == 'mastodon' for a in available):
+            available.append(('mastodon', handle, score))
+        else:
+            # update score if this is higher
+            for i, (m, info, s) in enumerate(available):
+                if m == 'mastodon' and score > s:
+                    available[i] = ('mastodon', handle, score)
+    
+    # MATRIX - score by presence (binary for now)
+    matrix = extra.get('matrix') or contact.get('matrix') or nested_extra.get('matrix')
+    if matrix and ':' in str(matrix):
+        available.append(('matrix', matrix, 40))
+    
+    # BLUESKY - score by followers/posts if available
+    bluesky = extra.get('bluesky') or contact.get('bluesky') or nested_extra.get('bluesky')
+    if bluesky:
+        bsky_activity = extra.get('bluesky_posts', 0)
+        bsky_score = min(100, 25 + (bsky_activity // 10))
+        available.append(('bluesky', bluesky, bsky_score))
+    
+    # LEMMY - score by activity
+    lemmy = extra.get('lemmy') or contact.get('lemmy') or nested_extra.get('lemmy')
+    if lemmy:
+        lemmy_activity = extra.get('lemmy_posts', 0) or extra.get('lemmy_comments', 0)
+        lemmy_score = min(100, 30 + lemmy_activity)
+        available.append(('lemmy', lemmy, lemmy_score))
+    
+    if platform == 'lemmy':
+        handle = human.get('username')
+        activity = extra.get('activity_count', 0)
+        score = min(100, 50 + activity)
+        if not any(a[0] == 'lemmy' for a in available):
+            available.append(('lemmy', handle, score))
+    
+    # DISCORD - lower priority (hard to DM)
+    discord = extra.get('discord') or contact.get('discord') or nested_extra.get('discord')
+    if discord:
+        available.append(('discord', discord, 20))
+    
+    # GITHUB ISSUE - for github users, score by repo activity
+    if platform == 'github':
+        top_repos = extra.get('top_repos', [])
+        if top_repos:
+            repo = top_repos[0] if isinstance(top_repos[0], str) else top_repos[0].get('name', '')
+            stars = extra.get('total_stars', 0)
+            repos_count = extra.get('repos_count', 0)
+            # active github user = higher issue score
+            gh_score = min(60, 20 + (stars // 100) + (repos_count // 5))
+            if repo:
+                available.append(('github_issue', f"{human.get('username')}/{repo}", gh_score))
+    
+    # REDDIT - discovered people, use their other links
+    if platform == 'reddit':
+        reddit_activity = extra.get('reddit_activity', 0) or extra.get('activity_count', 0)
+        # reddit users we reach via their external links (email, mastodon, etc)
+        # boost their other methods if reddit is their main platform
+        for i, (m, info, score) in enumerate(available):
+            if m in ('email', 'mastodon', 'matrix', 'bluesky'):
+                # boost score for reddit-discovered users' external contacts
+                boost = min(30, reddit_activity // 3)
+                available[i] = (m, info, score + boost)
+    
+    # sort by activity score (highest first)
+    available.sort(key=lambda x: x[2], reverse=True)
+    
+    if not available:
+        return 'manual', None, []
+    
+    best = available[0]
+    fallbacks = [(m, i) for m, i, p in available[1:]]
+    
+    return best[0], best[1], fallbacks
+
+
+def get_ranked_contact_methods(human):
+    """
+    get all contact methods for a human, ranked by their activity.
+    """
+    method, info, fallbacks = determine_contact_method(human)
+    if method == 'manual':
+        return []
+    return [(method, info)] + fallbacks

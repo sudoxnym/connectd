@@ -22,7 +22,7 @@ CACHE_DIR.mkdir(exist_ok=True)
 SCOUT_INTERVAL = 3600 * 4       # full scout every 4 hours
 MATCH_INTERVAL = 3600           # check matches every hour
 INTRO_INTERVAL = 1800       # send intros every 2 hours
-MAX_INTROS_PER_DAY = 250         # rate limit builder-to-builder outreach
+MAX_INTROS_PER_DAY = 1000         # rate limit builder-to-builder outreach
 
 
 # === MATCHING CONFIG ===
@@ -42,7 +42,7 @@ LOST_CONFIG = {
 
     # outreach settings
     'enabled': True,
-    'max_per_day': 20,               # lower volume, higher care
+    'max_per_day': 100,               # lower volume, higher care
     'require_review': False,        # fully autonomous
     'cooldown_days': 90,            # don't spam struggling people
 
@@ -70,6 +70,47 @@ GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+
+# === FORGE TOKENS ===
+# for creating issues on self-hosted git forges
+# each forge needs its own token from that instance
+#
+# CODEBERG: Settings -> Applications -> Generate Token (repo:write scope)
+# GITEA/FORGEJO: Settings -> Applications -> Generate Token
+# GITLAB: Settings -> Access Tokens -> Personal Access Token (api scope)
+# SOURCEHUT: Settings -> Personal Access Tokens (uses email instead)
+
+CODEBERG_TOKEN = os.environ.get('CODEBERG_TOKEN', '')
+GITEA_TOKENS = {}  # instance_url -> token, loaded from env
+GITLAB_TOKENS = {}  # instance_url -> token, loaded from env
+
+# parse GITEA_TOKENS from env
+# format: GITEA_TOKEN_192_168_1_8_3259=token -> http://192.168.1.8:3259
+# format: GITEA_TOKEN_codeberg_org=token -> https://codeberg.org
+def _parse_instance_url(env_key, prefix):
+    """convert env key to instance URL"""
+    raw = env_key.replace(prefix, '')
+    parts = raw.split('_')
+    
+    # check if last part is a port number
+    if parts[-1].isdigit() and len(parts[-1]) <= 5:
+        port = parts[-1]
+        host = '.'.join(parts[:-1])
+        # local IPs use http
+        if host.startswith('192.168.') or host.startswith('10.') or host == 'localhost':
+            return f'http://{host}:{port}'
+        return f'https://{host}:{port}'
+    else:
+        host = '.'.join(parts)
+        return f'https://{host}'
+
+for key, value in os.environ.items():
+    if key.startswith('GITEA_TOKEN_'):
+        url = _parse_instance_url(key, 'GITEA_TOKEN_')
+        GITEA_TOKENS[url] = value
+    elif key.startswith('GITLAB_TOKEN_'):
+        url = _parse_instance_url(key, 'GITLAB_TOKEN_')
+        GITLAB_TOKENS[url] = value
 MASTODON_TOKEN = os.environ.get('MASTODON_TOKEN', '')
 MASTODON_INSTANCE = os.environ.get('MASTODON_INSTANCE', '')
 

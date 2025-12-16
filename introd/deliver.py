@@ -333,19 +333,25 @@ def add_to_manual_queue(intro_data):
 def determine_best_contact(human):
     """
     determine best contact method based on WHERE THEY'RE MOST ACTIVE
-
-    uses activity-based selection from groq_draft module
+    
+    returns: (method, info, fallbacks)
+    uses activity-based selection - ranks by user's actual usage
     """
     from introd.groq_draft import determine_contact_method as activity_based_contact
-
-    method, info = activity_based_contact(human)
-
+    
+    method, info, fallbacks = activity_based_contact(human)
+    
     # convert github_issue info to dict format for delivery
-    if method == 'github_issue' and isinstance(info, str) and '/' in info:
-        parts = info.split('/', 1)
-        return method, {'owner': parts[0], 'repo': parts[1]}
-
-    return method, info
+    def format_info(m, i):
+        if m == 'github_issue' and isinstance(i, str) and '/' in i:
+            parts = i.split('/', 1)
+            return {'owner': parts[0], 'repo': parts[1]}
+        return i
+    
+    info = format_info(method, info)
+    fallbacks = [(m, format_info(m, i)) for m, i in fallbacks]
+    
+    return method, info, fallbacks
 
 
 def deliver_intro(match_data, intro_draft, dry_run=False):
@@ -362,8 +368,8 @@ def deliver_intro(match_data, intro_draft, dry_run=False):
     if already_contacted(recipient_id):
         return False, "already contacted", None
 
-    # determine contact method
-    method, contact_info = determine_best_contact(recipient)
+    # determine contact method with fallbacks
+    method, contact_info, fallbacks = determine_best_contact(recipient)
 
     log = load_delivery_log()
     result = {
@@ -423,17 +429,68 @@ def deliver_intro(match_data, intro_draft, dry_run=False):
         success = True
         error = "added to manual queue"
 
+    # if failed and we have fallbacks, try them
+    if not success and fallbacks:
+        for fallback_method, fallback_info in fallbacks:
+            result['fallback_attempts'] = result.get('fallback_attempts', [])
+            result['fallback_attempts'].append({
+                'method': fallback_method,
+                'contact_info': fallback_info
+            })
+            
+            fb_success = False
+            fb_error = None
+            
+            if fallback_method == 'email':
+                subject = f"someone you might want to know - connectd"
+                fb_success, fb_error = send_email(fallback_info, subject, intro_draft, dry_run)
+            elif fallback_method == 'mastodon':
+                fb_success, fb_error = send_mastodon_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'bluesky':
+                fb_success, fb_error = send_bluesky_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'matrix':
+                fb_success, fb_error = send_matrix_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'lemmy':
+                from scoutd.lemmy import send_lemmy_dm
+                fb_success, fb_error = send_lemmy_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'discord':
+                from scoutd.discord import send_discord_dm
+                fb_success, fb_error = send_discord_dm(fallback_info, intro_draft, dry_run)
+            elif fallback_method == 'github_issue':
+                owner = fallback_info.get('owner')
+                repo = fallback_info.get('repo')
+                title = "community introduction from connectd"
+                github_body = f"""hey {recipient.get('name') or recipient.get('username')},
+
+{intro_draft}
+
+---
+*automated introduction from connectd*
+"""
+                fb_success, fb_error = create_github_issue(owner, repo, title, github_body, dry_run)
+            
+            if fb_success:
+                success = True
+                method = fallback_method
+                contact_info = fallback_info
+                error = None
+                result['fallback_succeeded'] = fallback_method
+                break
+            else:
+                result['fallback_attempts'][-1]['error'] = fb_error
+    
     # log result
     result['success'] = success
     result['error'] = error
-
+    result['final_method'] = method
+    
     if success:
         log['sent'].append(result)
     else:
         log['failed'].append(result)
-
+    
     save_delivery_log(log)
-
+    
     return success, error, method
 
 

@@ -1,15 +1,20 @@
 """
 matchd/overlap.py - find pairs with alignment
+
+CRITICAL: blocks users with disqualifying negative signals (maga, conspiracy, conservative)
 """
 
 import json
 from .fingerprint import fingerprint_similarity
 
+# signals that HARD BLOCK matching - no exceptions
+DISQUALIFYING_SIGNALS = {'maga', 'conspiracy', 'conservative', 'antivax', 'sovcit'}
+
 
 def find_overlap(human_a, human_b, fp_a=None, fp_b=None):
     """
     analyze overlap between two humans
-    returns overlap details: score, shared values, complementary skills
+    returns None if either has disqualifying signals
     """
     # parse stored json if needed
     signals_a = human_a.get('signals', [])
@@ -20,13 +25,49 @@ def find_overlap(human_a, human_b, fp_a=None, fp_b=None):
     if isinstance(signals_b, str):
         signals_b = json.loads(signals_b)
 
+    # === HARD BLOCK: check for disqualifying negative signals ===
+    neg_a = human_a.get('negative_signals', [])
+    if isinstance(neg_a, str):
+        neg_a = json.loads(neg_a) if neg_a else []
+    
+    neg_b = human_b.get('negative_signals', [])
+    if isinstance(neg_b, str):
+        neg_b = json.loads(neg_b) if neg_b else []
+    
+    # also check 'reasons' field for WARNING entries
+    reasons_a = human_a.get('reasons', '')
+    if isinstance(reasons_a, str) and 'WARNING' in reasons_a:
+        # extract signals from WARNING: x, y, z
+        import re
+        warn_match = re.search(r'WARNING[:\s]+([^"\]]+)', reasons_a)
+        if warn_match:
+            warn_signals = [s.strip().lower() for s in warn_match.group(1).split(',')]
+            neg_a = list(set(neg_a + warn_signals))
+    
+    reasons_b = human_b.get('reasons', '')
+    if isinstance(reasons_b, str) and 'WARNING' in reasons_b:
+        import re
+        warn_match = re.search(r'WARNING[:\s]+([^"\]]+)', reasons_b)
+        if warn_match:
+            warn_signals = [s.strip().lower() for s in warn_match.group(1).split(',')]
+            neg_b = list(set(neg_b + warn_signals))
+    
+    # block if either has disqualifying signals
+    disq_a = set(neg_a) & DISQUALIFYING_SIGNALS
+    disq_b = set(neg_b) & DISQUALIFYING_SIGNALS
+    
+    if disq_a:
+        return None  # blocked
+    if disq_b:
+        return None  # blocked
+
     extra_a = human_a.get('extra', {})
     if isinstance(extra_a, str):
-        extra_a = json.loads(extra_a)
+        extra_a = json.loads(extra_a) if extra_a else {}
 
     extra_b = human_b.get('extra', {})
     if isinstance(extra_b, str):
-        extra_b = json.loads(extra_b)
+        extra_b = json.loads(extra_b) if extra_b else {}
 
     # shared signals
     shared_signals = list(set(signals_a) & set(signals_b))
@@ -36,7 +77,7 @@ def find_overlap(human_a, human_b, fp_a=None, fp_b=None):
     topics_b = set(extra_b.get('topics', []))
     shared_topics = list(topics_a & topics_b)
 
-    # complementary skills (what one has that the other doesn't)
+    # complementary skills
     langs_a = set(extra_a.get('languages', {}).keys())
     langs_b = set(extra_b.get('languages', {}).keys())
     complementary_langs = list((langs_a - langs_b) | (langs_b - langs_a))
@@ -68,38 +109,30 @@ def find_overlap(human_a, human_b, fp_a=None, fp_b=None):
 
     # calculate overlap score
     base_score = 0
-
-    # shared values (most important)
     base_score += len(shared_signals) * 10
-
-    # shared interests
     base_score += len(shared_topics) * 5
 
-    # complementary skills bonus (they can help each other)
     if complementary_langs:
         base_score += min(len(complementary_langs), 5) * 3
 
-    # geographic bonus
     if geographic_match:
         base_score += 20
 
-    # fingerprint similarity if available
     fp_score = 0
     if fp_a and fp_b:
         fp_score = fingerprint_similarity(fp_a, fp_b) * 50
 
     total_score = base_score + fp_score
 
-    # build reasons
     overlap_reasons = []
     if shared_signals:
-        overlap_reasons.append(f"shared values: {', '.join(shared_signals[:5])}")
+        overlap_reasons.append(f"shared: {', '.join(shared_signals[:5])}")
     if shared_topics:
-        overlap_reasons.append(f"shared interests: {', '.join(shared_topics[:5])}")
+        overlap_reasons.append(f"interests: {', '.join(shared_topics[:5])}")
     if geo_reason:
         overlap_reasons.append(geo_reason)
     if complementary_langs:
-        overlap_reasons.append(f"complementary skills: {', '.join(complementary_langs[:5])}")
+        overlap_reasons.append(f"complementary: {', '.join(complementary_langs[:5])}")
 
     return {
         'overlap_score': total_score,
@@ -114,36 +147,28 @@ def find_overlap(human_a, human_b, fp_a=None, fp_b=None):
 
 
 def is_same_person(human_a, human_b):
-    """
-    check if two records might be the same person (cross-platform)
-    """
-    # same platform = definitely different records
+    """check if two records might be the same person (cross-platform)"""
     if human_a['platform'] == human_b['platform']:
         return False
 
-    # check username similarity
     user_a = human_a.get('username', '').lower().split('@')[0]
     user_b = human_b.get('username', '').lower().split('@')[0]
 
     if user_a == user_b:
         return True
 
-    # check if github username matches
     contact_a = human_a.get('contact', {})
     contact_b = human_b.get('contact', {})
 
     if isinstance(contact_a, str):
-        contact_a = json.loads(contact_a)
+        contact_a = json.loads(contact_a) if contact_a else {}
     if isinstance(contact_b, str):
-        contact_b = json.loads(contact_b)
+        contact_b = json.loads(contact_b) if contact_b else {}
 
-    # github cross-reference
     if contact_a.get('github') and contact_a.get('github') == contact_b.get('github'):
         return True
     if contact_a.get('github') == user_b or contact_b.get('github') == user_a:
         return True
-
-    # email cross-reference
     if contact_a.get('email') and contact_a.get('email') == contact_b.get('email'):
         return True
 
