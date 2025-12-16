@@ -15,6 +15,11 @@ from datetime import datetime
 from db import Database
 from db.users import get_priority_users, get_priority_user_matches, get_priority_user
 
+# central API config
+import requests
+CENTRAL_API = os.environ.get('CONNECTD_CENTRAL_API', '')
+CENTRAL_KEY = os.environ.get('CONNECTD_API_KEY', '')
+
 API_PORT = int(os.environ.get('CONNECTD_API_PORT', 8099))
 
 # shared state (updated by daemon)
@@ -177,13 +182,29 @@ async function loadStats() {
 
     $('status').innerHTML = 'daemon <b>' + (h.running ? 'ON' : 'OFF') + '</b> | ' + uptime + ' | ' + h.intros_today + ' today';
 
+    var centralHtml = '';
+    if (s.central && !s.central.error) {
+        centralHtml = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #333">' +
+            '<div style="color:#82aaff;font-size:0.8em;margin-bottom:8px">// central api</div>' +
+            '<div class="stats">' +
+            '<div class="stat"><b>' + s.central.total_humans + '</b><small>humans</small></div>' +
+            '<div class="stat"><b>' + s.central.total_matches.toLocaleString() + '</b><small>matches</small></div>' +
+            '<div class="stat"><b>' + s.central.lost_builders + '</b><small>lost</small></div>' +
+            '<div class="stat"><b>' + s.central.intros_sent + '</b><small>sent</small></div>' +
+            '<div class="stat"><b>' + s.central.active_instances + '</b><small>instances</small></div>' +
+            '</div></div>';
+    }
+
     $('stats').innerHTML =
+        '<div style="color:#666;font-size:0.8em;margin-bottom:8px">// local</div>' +
+        '<div class="stats">' +
         '<div class="stat"><b>' + s.total_humans + '</b><small>humans</small></div>' +
         '<div class="stat"><b>' + s.total_matches + '</b><small>matches</small></div>' +
         '<div class="stat"><b>' + h.score_90_plus + '</b><small>90+</small></div>' +
         '<div class="stat"><b>' + h.score_80_89 + '</b><small>80+</small></div>' +
         '<div class="stat"><b>' + h.matches_pending + '</b><small>queue</small></div>' +
-        '<div class="stat"><b>' + s.sent_intros + '</b><small>sent</small></div>';
+        '<div class="stat"><b>' + s.sent_intros + '</b><small>sent</small></div>' +
+        '</div>' + centralHtml;
 }
 
 async function loadHost() {
@@ -1028,11 +1049,30 @@ class APIHandler(BaseHTTPRequestHandler):
             self._send_json({'error': str(e)}, 500)
 
     def _handle_stats(self):
-        """return database statistics"""
+        """return database statistics (local + central)"""
         try:
             db = Database()
             stats = db.stats()
             db.close()
+            
+            # add central API stats if configured
+            if CENTRAL_API and CENTRAL_KEY:
+                try:
+                    headers = {'X-API-Key': CENTRAL_KEY}
+                    resp = requests.get(f'{CENTRAL_API}/stats', headers=headers, timeout=5)
+                    if resp.status_code == 200:
+                        central = resp.json()
+                        stats['central'] = {
+                            'total_humans': central.get('total_humans', 0),
+                            'lost_builders': central.get('lost_builders', 0),
+                            'builders': central.get('builders', 0),
+                            'total_matches': central.get('total_matches', 0),
+                            'intros_sent': central.get('intros_sent', 0),
+                            'active_instances': central.get('active_instances', 0),
+                        }
+                except Exception as ce:
+                    stats['central'] = {'error': str(ce)}
+            
             self._send_json(stats)
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
