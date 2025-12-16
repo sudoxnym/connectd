@@ -18,11 +18,11 @@ we lift them up. we show them what's possible. we connect them to people who GET
 
 ## what it does
 
-1. **scouts** - discovers humans across platforms (github, reddit, mastodon, lemmy, discord, lobsters, bluesky, matrix)
+1. **scouts** - discovers humans across platforms (github, mastodon, lemmy, reddit, lobsters, bluesky, matrix, discord, and self-hosted git forges)
 2. **analyzes** - scores them for values alignment AND lost builder potential
 3. **matches** - pairs aligned builders together, or pairs lost builders with inspiring active ones
 4. **drafts** - uses LLM to write genuine, personalized intros
-5. **delivers** - sends via email, mastodon DM, bluesky DM, matrix DM, discord DM, or github issue
+5. **delivers** - sends via the channel they're most active on (email, mastodon, bluesky, matrix, discord, github issue, or forge issue)
 
 fully autonomous. no manual review. self-sustaining pipe.
 
@@ -44,6 +44,40 @@ people who have potential but haven't started yet, gave up, or are struggling:
 - aspirational bios ("learning...", "aspiring...")
 
 lost builders don't get matched to each other (both need energy). they get matched to ACTIVE builders who can inspire them.
+
+## discovery sources
+
+| platform | method |
+|----------|--------|
+| github | API + profile scraping |
+| mastodon | public API |
+| lemmy | federation API |
+| reddit | public API |
+| lobsters | web scraping |
+| bluesky | AT Protocol |
+| matrix | room membership |
+| discord | bot API |
+| **gitea/forgejo** | instance API |
+| **gitlab CE** | instance API |
+| **gogs** | instance API |
+| **sourcehut** | web scraping |
+| **codeberg** | gitea API |
+
+self-hosted git forge users = highest signal. they actually selfhost.
+
+## delivery methods
+
+connectd picks the best contact method based on **activity** - not a static priority list. if someone's most active on mastodon, they get a mastodon DM. if that fails, it falls back to their second-most-active platform.
+
+| method | notes |
+|--------|-------|
+| email | extracted from profiles, commits, websites |
+| mastodon DM | if they allow DMs |
+| bluesky DM | via AT Protocol |
+| matrix DM | creates DM room |
+| discord DM | via bot |
+| github issue | on their most active repo |
+| **forge issue** | gitea/forgejo/gitlab/gogs repos |
 
 ## quick start
 
@@ -71,7 +105,7 @@ python daemon.py            # live mode
 # discovery
 python cli.py scout                    # all platforms
 python cli.py scout --github           # github only
-python cli.py scout --reddit --lemmy   # specific platforms
+python cli.py scout --forges           # self-hosted git forges
 python cli.py scout --user octocat     # deep scrape one user
 
 # matching
@@ -97,27 +131,24 @@ python cli.py daemon --oneshot         # run once then exit
 python cli.py status                   # show stats
 ```
 
-## docker
+## distributed mode
+
+multiple connectd instances can coordinate via a central API to:
+- share discovered humans
+- avoid duplicate outreach
+- claim/release outreach targets
 
 ```bash
-# build
-docker build -t connectd .
-
-# run daemon
-docker compose up -d
-
-# run one-off commands
-docker compose run --rm connectd python cli.py scout
-docker compose run --rm connectd python cli.py status
+# set in .env
+CONNECTD_CENTRAL_API=https://your-central-api.com
+CONNECTD_API_KEY=your-api-key
+CONNECTD_INSTANCE_ID=instance-name
+CONNECTD_INSTANCE_IP=your-ip
 ```
 
 ## environment variables
 
-copy `.env.example` to `.env` and fill in your values:
-
-```bash
-cp .env.example .env
-```
+copy `.env.example` to `.env` and fill in your values.
 
 ### required
 
@@ -132,7 +163,7 @@ cp .env.example .env
 | `GITHUB_TOKEN` | higher rate limits for github API |
 | `DISCORD_BOT_TOKEN` | discord bot token for server access |
 | `DISCORD_TARGET_SERVERS` | comma-separated server IDs to scout |
-| `LEMMY_INSTANCE` | your lemmy instance (e.g. `lemmy.ml`) |
+| `LEMMY_INSTANCE` | your lemmy instance |
 | `LEMMY_USERNAME` | lemmy username for auth |
 | `LEMMY_PASSWORD` | lemmy password for auth |
 
@@ -141,11 +172,11 @@ cp .env.example .env
 | variable | description |
 |----------|-------------|
 | `MASTODON_TOKEN` | mastodon access token |
-| `MASTODON_INSTANCE` | your mastodon instance (e.g. `mastodon.social`) |
-| `BLUESKY_HANDLE` | bluesky handle (e.g. `you.bsky.social`) |
+| `MASTODON_INSTANCE` | your mastodon instance |
+| `BLUESKY_HANDLE` | bluesky handle |
 | `BLUESKY_APP_PASSWORD` | bluesky app password |
 | `MATRIX_HOMESERVER` | matrix homeserver URL |
-| `MATRIX_USER_ID` | matrix user ID (e.g. `@bot:matrix.org`) |
+| `MATRIX_USER_ID` | matrix user ID |
 | `MATRIX_ACCESS_TOKEN` | matrix access token |
 | `SMTP_HOST` | email server host |
 | `SMTP_PORT` | email server port (default 465) |
@@ -153,26 +184,43 @@ cp .env.example .env
 | `SMTP_PASS` | email password |
 | `FROM_EMAIL` | from address for emails |
 
-you need at least ONE delivery method configured for intros to be sent.
+### forge tokens
+
+for creating issues on self-hosted git forges:
+
+| variable | description |
+|----------|-------------|
+| `CODEBERG_TOKEN` | codeberg.org access token |
+| `GITEA_TOKEN_<instance>` | gitea/forgejo token (e.g. `GITEA_TOKEN_git_example_com`) |
+| `GITLAB_TOKEN_<instance>` | gitlab CE token (e.g. `GITLAB_TOKEN_gitlab_example_com`) |
+
+instance names use underscores: `git.example.com` → `GITEA_TOKEN_git_example_com`
+
+for ports: `192.168.1.8:3000` → `GITEA_TOKEN_192_168_1_8_3000`
 
 ## architecture
 
 ```
-scoutd/     - discovery modules (one per platform)
-matchd/     - matching + fingerprinting logic
-introd/     - intro drafting + delivery
-db/         - sqlite storage
-config.py   - central configuration
-daemon.py   - continuous runner
-cli.py      - command line interface
+scoutd/        - discovery modules (one per platform)
+  forges.py    - gitea/forgejo/gitlab/gogs/sourcehut scraper
+  handles.py   - cross-platform handle discovery
+matchd/        - matching + fingerprinting logic
+introd/        - intro drafting + delivery
+  deliver.py   - multi-channel delivery with fallback
+  groq_draft.py - LLM-powered intro generation
+db/            - sqlite storage
+central_client.py - distributed coordination
+config.py      - central configuration
+daemon.py      - continuous runner
+cli.py         - command line interface
 ```
 
 ## intervals (daemon mode)
 
 - scout: every 4 hours
-- match: every 1 hour
-- stranger intros: every 2 hours (max 20/day)
-- lost builder intros: every 6 hours (max 5/day)
+- match: every 1 hour  
+- intros: every 2 hours (max 1000/day)
+- lost builder intros: every 6 hours (max 100/day)
 
 ## forking
 
