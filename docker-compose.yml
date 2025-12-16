@@ -1,0 +1,23 @@
+services:
+  connectd:
+    image: sudoxreboot/connectd:latest
+    container_name: connectd
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8099:8099"
+    extra_hosts:
+      - "mastodon.sudoxreboot.com:192.168.1.39"
+    volumes:
+      - ./data:/app/data
+      - ./db:/app/db
+      - ./data_db:/data/db
+      - ./daemon.py:/app/daemon.py:ro
+      - ./deep.py:/app/scoutd/deep.py:ro
+      - ./db_init.py:/app/db/__init__.py:ro
+      - ./config.py:/app/config.py:ro
+      - ./groq_draft.py:/app/introd/groq_draft.py:ro
+      - ./api.py:/app/api.py:ro
+      - ./deliver.py:/app/introd/deliver.py:ro
+      - ./soul.txt:/app/soul.txt:ro

@@ -1,0 +1,82 @@
+{
+  "users": {
+    "testuser": [
+      "home-assistant",
+      "esphome"
+    ],
+    "sudoxnym": [],
+    "joyeusenoelle": [],
+    "sbilly": [
+      "awesome-security"
+    ],
+    "turt2live": [
+      "matrix-org",
+      "element-hq",
+      "ENTS-Source",
+      "IETF-Hackathon",
+      "t2bot"
+    ],
+    "balloob": [
+      "home-assistant",
+      "hassio-addons",
+      "NabuCasa",
+      "esphome",
+      "OpenHomeFoundation"
+    ],
+    "anikdhabal": [],
+    "fabaff": [
+      "NixOS",
+      "home-assistant",
+      "affolter-engineering",
+      "esphome",
+      "home-assistant-ecosystem"
+    ],
+    "uhthomas": [
+      "wiz-sec"
+    ],
+    "emontnemery": [],
+    "Stradex": [],
+    "Tribler": [],
+    "bdraco": [
+      "CpanelInc",
+      "aio-libs",
+      "home-assistant",
+      "esphome",
+      "python-kasa",
+      "home-assistant-libs",
+      "Bluetooth-Devices",
+      "python-zeroconf",
+      "pyenphase",
+      "ESPHome-RATGDO",
+      "ratgdo",
+      "OpenHomeFoundation",
+      "uilibs",
+      "sblibs",
+      "openvideolibs",
+      "Harmony-Libs",
+      "lightinglibs",
+      "kohlerlibs",
+      "open-home-foundation-maintainers",
+      "Yale-Libs",
+      "Solarlibs",
+      "esphome-libs"
+    ],
+    "ArchiveBox": []
+  },
+  "updated": {
+    "testuser": "2025-12-14T22:44:28.772479",
+    "sudoxnym": "2025-12-14T22:51:13.523581",
+    "joyeusenoelle": "2025-12-14T23:19:46.135417",
+    "sbilly": "2025-12-14T23:19:55.813111",
+    "turt2live": "2025-12-14T23:20:04.266843",
+    "balloob": "2025-12-14T23:20:20.527129",
+    "anikdhabal": "2025-12-14T23:20:32.904717",
+    "fabaff": "2025-12-14T23:20:39.889442",
+    "uhthomas": "2025-12-14T23:20:59.048667",
+    "emontnemery": "2025-12-14T23:21:06.590806",
+    "Stradex": "2025-12-14T23:21:14.490327",
+    "Tribler": "2025-12-14T23:21:24.234634",
+    "bdraco": "2025-12-14T23:26:12.662456",
+    "ArchiveBox": "2025-12-14T23:26:32.513637"
+  }
+}

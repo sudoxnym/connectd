@@ -1,0 +1,137 @@
+{
+  "sent": [
+    {
+      "recipient_id": "github:dwmw2",
+      "recipient_name": "David Woodhouse",
+      "method": "email",
+      "contact_info": "dwmw2@infradead.org",
+      "overlap_score": 172.01631023799695,
+      "timestamp": "2025-12-15T23:14:45.542509",
+      "success": true,
+      "error": null
+    },
+    {
+      "recipient_id": "github:pvizeli",
+      "recipient_name": "Pascal Vizeli",
+      "method": "email",
+      "contact_info": "pascal.vizeli@syshack.ch",
+      "overlap_score": 163.33333333333331,
+      "timestamp": "2025-12-15T23:14:48.462716",
+      "success": true,
+      "error": null
+    },
+    {
+      "recipient_id": "github:2234839",
+      "recipient_name": "\u5d2e\u751f",
+      "method": "email",
+      "contact_info": "admin@shenzilong.cn",
+      "overlap_score": 163.09442000261095,
+      "timestamp": "2025-12-15T23:14:50.749442",
+      "success": true,
+      "error": null
+    },
+    {
+      "recipient_id": "github:zomars",
+      "recipient_name": "Omar L\u00f3pez",
+      "method": "email",
+      "contact_info": "zomars@me.com",
+      "overlap_score": 138.9593178751708,
+      "timestamp": "2025-12-16T00:39:43.266181",
+      "success": true,
+      "error": null
+    },
+    {
+      "recipient_id": "github:joshuaboniface",
+      "recipient_name": "Joshua M. Boniface",
+      "method": "mastodon",
+      "contact_info": "@joshuaboniface@www.youtube.com",
+      "overlap_score": 136.06304901929022,
+      "timestamp": "2025-12-16T00:59:21.763092",
+      "success": true,
+      "error": "https://mastodon.sudoxreboot.com/@connectd/115726533401043321"
+    },
+    {
+      "recipient_id": "github:dariusk",
+      "recipient_name": "Darius Kazemi",
+      "method": "mastodon",
+      "contact_info": "@darius@friend.camp",
+      "overlap_score": 135.39490109778416,
+      "timestamp": "2025-12-16T00:59:22.199945",
+      "success": true,
+      "error": "https://mastodon.sudoxreboot.com/@connectd/115726533505124538"
+    }
+  ],
+  "failed": [
+    {
+      "recipient_id": "github:joyeusenoelle",
+      "recipient_name": "No\u00eblle Anthony",
+      "method": "mastodon",
+      "contact_info": "@noelle@chat.noelle.codes",
+      "overlap_score": 65,
+      "timestamp": "2025-12-14T23:44:17.215796",
+      "success": false,
+      "error": "MASTODON_TOKEN not set"
+    },
+    {
+      "recipient_id": "github:balloob",
+      "recipient_name": "Paulus Schoutsen",
+      "method": "mastodon",
+      "contact_info": "@home_assistant@youtube.com",
+      "overlap_score": 163.09442000261095,
+      "timestamp": "2025-12-15T23:14:50.155178",
+      "success": false,
+      "error": "mastodon api error: 401 - {\"error\":\"The access token is invalid\"}"
+    },
+    {
+      "recipient_id": "github:balloob",
+      "recipient_name": "Paulus Schoutsen",
+      "method": "mastodon",
+      "contact_info": "@home_assistant@youtube.com",
+      "overlap_score": 163.09442000261095,
+      "timestamp": "2025-12-15T23:14:50.334902",
+      "success": false,
+      "error": "mastodon api error: 401 - {\"error\":\"The access token is invalid\"}"
+    },
+    {
+      "recipient_id": "github:joshuaboniface",
+      "recipient_name": "Joshua M. Boniface",
+      "method": "mastodon",
+      "contact_info": "@joshuaboniface@www.youtube.com",
+      "overlap_score": 136.06304901929022,
+      "timestamp": "2025-12-16T00:53:25.848601",
+      "success": false,
+      "error": "HTTPSConnectionPool(host='mastodon.sudoxreboot.com', port=443): Max retries exceeded with url: /api/v1/statuses (Caused by ConnectTimeoutError(<HTTPSConnection(host='mastodon.sudoxreboot.com', port=443) at 0x7f794e05e490>, 'Connection to mastodon.sudoxreboot.com timed out. (connect timeout=30)'))"
+    },
+    {
+      "recipient_id": "github:joshuaboniface",
+      "recipient_name": "Joshua M. Boniface",
+      "method": "mastodon",
+      "contact_info": "@joshuaboniface@www.youtube.com",
+      "overlap_score": 136.06304901929022,
+      "timestamp": "2025-12-16T00:53:55.912872",
+      "success": false,
+      "error": "HTTPSConnectionPool(host='mastodon.sudoxreboot.com', port=443): Max retries exceeded with url: /api/v1/statuses (Caused by ConnectTimeoutError(<HTTPSConnection(host='mastodon.sudoxreboot.com', port=443) at 0x7f794e07b1d0>, 'Connection to mastodon.sudoxreboot.com timed out. (connect timeout=30)'))"
+    },
+    {
+      "recipient_id": "github:dariusk",
+      "recipient_name": "Darius Kazemi",
+      "method": "mastodon",
+      "contact_info": "@darius@friend.camp",
+      "overlap_score": 135.39490109778416,
+      "timestamp": "2025-12-16T00:54:25.947404",
+      "success": false,
+      "error": "HTTPSConnectionPool(host='mastodon.sudoxreboot.com', port=443): Max retries exceeded with url: /api/v1/statuses (Caused by ConnectTimeoutError(<HTTPSConnection(host='mastodon.sudoxreboot.com', port=443) at 0x7f794e0986d0>, 'Connection to mastodon.sudoxreboot.com timed out. (connect timeout=30)'))"
+    },
+    {
+      "recipient_id": "github:dariusk",
+      "recipient_name": "Darius Kazemi",
+      "method": "mastodon",
+      "contact_info": "@darius@friend.camp",
+      "overlap_score": 135.39490109778416,
+      "timestamp": "2025-12-16T00:54:55.982839",
+      "success": false,
+      "error": "HTTPSConnectionPool(host='mastodon.sudoxreboot.com', port=443): Max retries exceeded with url: /api/v1/statuses (Caused by ConnectTimeoutError(<HTTPSConnection(host='mastodon.sudoxreboot.com', port=443) at 0x7f794de9dd90>, 'Connection to mastodon.sudoxreboot.com timed out. (connect timeout=30)'))"
+    }
+  ],
+  "queued": []
+}

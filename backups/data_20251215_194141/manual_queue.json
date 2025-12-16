@@ -1,0 +1,371 @@
+[
+  {
+    "platform": "reddit",
+    "username": "julietcam84",
+    "url": "https://reddit.com/u/julietcam84",
+    "score": 195,
+    "subreddits": [
+      "cooperatives",
+      "intentionalcommunity"
+    ],
+    "signals": [
+      "cooperative",
+      "community",
+      "intentional_community",
+      "remote"
+    ],
+    "reasons": [
+      "active in: cooperatives, intentionalcommunity",
+      "signals: cooperative, community, intentional_community, remote",
+      "REDDIT-ONLY: needs manual review for outreach"
+    ],
+    "note": "reddit-only user - no external links found. DM manually if promising.",
+    "queued_at": "2025-12-15T09:06:32.705954",
+    "status": "pending"
+  },
+  {
+    "platform": "reddit",
+    "username": "MasterRoshi1620",
+    "url": "https://reddit.com/u/MasterRoshi1620",
+    "score": 159,
+    "subreddits": [
+      "selfhosted",
+      "homelab"
+    ],
+    "signals": [
+      "unix",
+      "privacy",
+      "selfhosted",
+      "modern_lang",
+      "containers"
+    ],
+    "reasons": [
+      "active in: selfhosted, homelab",
+      "signals: unix, privacy, selfhosted, modern_lang, containers",
+      "REDDIT-ONLY: needs manual review for outreach"
+    ],
+    "note": "reddit-only user - no external links found. DM manually if promising.",
+    "queued_at": "2025-12-15T22:54:56.414100",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 2779,
+      "human_a": {
+        "id": 642,
+        "username": "qcasey",
+        "platform": "github",
+        "name": "Quinn Casey",
+        "url": "https://github.com/qcasey",
+        "contact": "{\"email\": \"github@letterq.org\", \"emails\": [\"github@letterq.org\", \"134208@letterq.org\", \"ceo@business.net\", \"career@letterq.org\", \"recruitmentspam@letterq.org\"], \"blog\": \"https://quinncasey.com\", \"twitter\": null, \"mastodon\": \"@678995876047487016@discord.com\", \"bluesky\": \"quinncasey.com\", \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"extra\": {\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"hireable\": true, \"handles\": {\"github\": \"qcasey\", \"telegram\": \"@qcasey\", \"bluesky\": \"quinncasey.com\", \"mastodon\": \"@678995876047487016@discord.com\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:43:55.251547\"}"
+      },
+      "human_b": {
+        "id": 91,
+        "username": "mib1185",
+        "platform": "github",
+        "name": "Michael",
+        "url": "https://github.com/mib1185",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"Python\": 27, \"HTML\": 2, \"TypeScript\": 1, \"Dockerfile\": 2, \"Shell\": 8, \"JavaScript\": 1, \"Jinja\": 2, \"PHP\": 1, \"Go\": 1}, \"repo_count\": 85, \"total_stars\": 136, \"extra\": {\"topics\": [], \"languages\": {\"Python\": 27, \"HTML\": 2, \"TypeScript\": 1, \"Dockerfile\": 2, \"Shell\": 8, \"JavaScript\": 1, \"Jinja\": 2, \"PHP\": 1, \"Go\": 1}, \"repo_count\": 85, \"total_stars\": 136, \"hireable\": null, \"handles\": {\"github\": \"ansible\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:08:57.297790\"}"
+      },
+      "overlap_score": 185.0,
+      "overlap_reasons": "[\"shared values: unix, foss, federated_chat, home_automation, privacy\", \"both remote-friendly\", \"complementary skills: Kotlin, C++, Jinja, Ruby, CSS\"]"
+    },
+    "draft": "hi Quinn,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using JavaScript, Python, Go | (100 repos) | interested in foss, home_automation, privacy\n\nMichael is building: using Python, HTML, TypeScript | (85 repos) | interested in foss, home_automation, privacy\n\noverlap: shared values: unix, foss, federated_chat, home_automation, privacy | both remote-friendly | complementary skills: Kotlin, C++, Jinja, Ruby, CSS\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/mib1185\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 91,
+      "username": "mib1185",
+      "platform": "github",
+      "name": "Michael",
+      "url": "https://github.com/mib1185",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"Python\": 27, \"HTML\": 2, \"TypeScript\": 1, \"Dockerfile\": 2, \"Shell\": 8, \"JavaScript\": 1, \"Jinja\": 2, \"PHP\": 1, \"Go\": 1}, \"repo_count\": 85, \"total_stars\": 136, \"extra\": {\"topics\": [], \"languages\": {\"Python\": 27, \"HTML\": 2, \"TypeScript\": 1, \"Dockerfile\": 2, \"Shell\": 8, \"JavaScript\": 1, \"Jinja\": 2, \"PHP\": 1, \"Go\": 1}, \"repo_count\": 85, \"total_stars\": 136, \"hireable\": null, \"handles\": {\"github\": \"ansible\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:08:57.297790\"}"
+    },
+    "queued_at": "2025-12-15T23:14:45.528184",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 2795,
+      "human_a": {
+        "id": 642,
+        "username": "qcasey",
+        "platform": "github",
+        "name": "Quinn Casey",
+        "url": "https://github.com/qcasey",
+        "contact": "{\"email\": \"github@letterq.org\", \"emails\": [\"github@letterq.org\", \"134208@letterq.org\", \"ceo@business.net\", \"career@letterq.org\", \"recruitmentspam@letterq.org\"], \"blog\": \"https://quinncasey.com\", \"twitter\": null, \"mastodon\": \"@678995876047487016@discord.com\", \"bluesky\": \"quinncasey.com\", \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"extra\": {\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"hireable\": true, \"handles\": {\"github\": \"qcasey\", \"telegram\": \"@qcasey\", \"bluesky\": \"quinncasey.com\", \"mastodon\": \"@678995876047487016@discord.com\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:43:55.251547\"}"
+      },
+      "human_b": {
+        "id": 110,
+        "username": "RoboMagus",
+        "platform": "github",
+        "name": null,
+        "url": "https://github.com/RoboMagus",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"Python\": 17, \"Vue\": 3, \"HTML\": 1, \"JavaScript\": 11, \"C++\": 7, \"TypeScript\": 6, \"Go\": 3, \"Kotlin\": 1, \"Shell\": 4, \"Dockerfile\": 2, \"C\": 1, \"Less\": 1}, \"repo_count\": 86, \"total_stars\": 77, \"extra\": {\"topics\": [], \"languages\": {\"Python\": 17, \"Vue\": 3, \"HTML\": 1, \"JavaScript\": 11, \"C++\": 7, \"TypeScript\": 6, \"Go\": 3, \"Kotlin\": 1, \"Shell\": 4, \"Dockerfile\": 2, \"C\": 1, \"Less\": 1}, \"repo_count\": 86, \"total_stars\": 77, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:09:50.629088\"}"
+      },
+      "overlap_score": 173.03582460328593,
+      "overlap_reasons": "[\"shared values: unix, foss, home_automation, privacy, community\", \"both remote-friendly\", \"complementary skills: Less, Ruby, CSS, Dart, PHP\"]"
+    },
+    "draft": "hi Quinn,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using JavaScript, Python, Go | (100 repos) | interested in foss, home_automation, privacy\n\nRoboMagus is building: using Python, Vue, HTML | (86 repos) | interested in foss, home_automation, privacy\n\noverlap: shared values: unix, foss, home_automation, privacy, community | both remote-friendly | complementary skills: Less, Ruby, CSS, Dart, PHP\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/RoboMagus\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 110,
+      "username": "RoboMagus",
+      "platform": "github",
+      "name": null,
+      "url": "https://github.com/RoboMagus",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"Python\": 17, \"Vue\": 3, \"HTML\": 1, \"JavaScript\": 11, \"C++\": 7, \"TypeScript\": 6, \"Go\": 3, \"Kotlin\": 1, \"Shell\": 4, \"Dockerfile\": 2, \"C\": 1, \"Less\": 1}, \"repo_count\": 86, \"total_stars\": 77, \"extra\": {\"topics\": [], \"languages\": {\"Python\": 17, \"Vue\": 3, \"HTML\": 1, \"JavaScript\": 11, \"C++\": 7, \"TypeScript\": 6, \"Go\": 3, \"Kotlin\": 1, \"Shell\": 4, \"Dockerfile\": 2, \"C\": 1, \"Less\": 1}, \"repo_count\": 86, \"total_stars\": 77, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:09:50.629088\"}"
+    },
+    "queued_at": "2025-12-15T23:14:45.535258",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 2768,
+      "human_a": {
+        "id": 642,
+        "username": "qcasey",
+        "platform": "github",
+        "name": "Quinn Casey",
+        "url": "https://github.com/qcasey",
+        "contact": "{\"email\": \"github@letterq.org\", \"emails\": [\"github@letterq.org\", \"134208@letterq.org\", \"ceo@business.net\", \"career@letterq.org\", \"recruitmentspam@letterq.org\"], \"blog\": \"https://quinncasey.com\", \"twitter\": null, \"mastodon\": \"@678995876047487016@discord.com\", \"bluesky\": \"quinncasey.com\", \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"extra\": {\"topics\": [], \"languages\": {\"JavaScript\": 12, \"Python\": 21, \"Go\": 15, \"TypeScript\": 4, \"Svelte\": 1, \"Rust\": 1, \"Kotlin\": 2, \"HTML\": 1, \"CSS\": 2, \"C\": 1, \"Dart\": 2, \"Ruby\": 1, \"C++\": 2, \"Dockerfile\": 1, \"Java\": 1, \"Shell\": 1, \"PHP\": 1, \"AppleScript\": 1}, \"repo_count\": 100, \"total_stars\": 324, \"hireable\": true, \"handles\": {\"github\": \"qcasey\", \"telegram\": \"@qcasey\", \"bluesky\": \"quinncasey.com\", \"mastodon\": \"@678995876047487016@discord.com\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:43:55.251547\"}"
+      },
+      "human_b": {
+        "id": 415,
+        "username": "sbilly",
+        "platform": "github",
+        "name": "sbilly",
+        "url": "https://github.com/sbilly",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"http://sbilly.com/\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"decentralized\", \"community\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [\"mesh-network\"], \"languages\": {\"Go\": 4, \"Shell\": 4, \"Dockerfile\": 1, \"Python\": 12, \"JavaScript\": 14, \"Java\": 3, \"Ruby\": 3, \"CSS\": 3, \"C++\": 6, \"CoffeeScript\": 1, \"Scala\": 2, \"HTML\": 5, \"Vue\": 1, \"Clojure\": 1, \"PHP\": 3, \"TypeScript\": 1, \"C\": 8, \"Assembly\": 2, \"Objective-C\": 1, \"C#\": 1}, \"repo_count\": 100, \"total_stars\": 14354, \"extra\": {\"topics\": [\"mesh-network\"], \"languages\": {\"Go\": 4, \"Shell\": 4, \"Dockerfile\": 1, \"Python\": 12, \"JavaScript\": 14, \"Java\": 3, \"Ruby\": 3, \"CSS\": 3, \"C++\": 6, \"CoffeeScript\": 1, \"Scala\": 2, \"HTML\": 5, \"Vue\": 1, \"Clojure\": 1, \"PHP\": 3, \"TypeScript\": 1, \"C\": 8, \"Assembly\": 2, \"Objective-C\": 1, \"C#\": 1}, \"repo_count\": 100, \"total_stars\": 14354, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:29:03.191201\"}"
+      },
+      "overlap_score": 170.3406027914858,
+      "overlap_reasons": "[\"shared values: unix, foss, federated_chat, home_automation, privacy\", \"both remote-friendly\", \"complementary skills: Kotlin, Clojure, Scala, Objective-C, Dart\"]"
+    },
+    "draft": "hi Quinn,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using JavaScript, Python, Go | (100 repos) | interested in foss, home_automation, privacy\n\nsbilly is building: working on mesh-network | using Go, Shell, Dockerfile | (100 repos) | interested in foss, home_automation, privacy\n\noverlap: shared values: unix, foss, federated_chat, home_automation, privacy | both remote-friendly | complementary skills: Kotlin, Clojure, Scala, Objective-C, Dart\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/sbilly\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 415,
+      "username": "sbilly",
+      "platform": "github",
+      "name": "sbilly",
+      "url": "https://github.com/sbilly",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"http://sbilly.com/\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"decentralized\", \"community\", \"modern_lang\", \"containers\", \"remote\"]",
+      "extra": "{\"topics\": [\"mesh-network\"], \"languages\": {\"Go\": 4, \"Shell\": 4, \"Dockerfile\": 1, \"Python\": 12, \"JavaScript\": 14, \"Java\": 3, \"Ruby\": 3, \"CSS\": 3, \"C++\": 6, \"CoffeeScript\": 1, \"Scala\": 2, \"HTML\": 5, \"Vue\": 1, \"Clojure\": 1, \"PHP\": 3, \"TypeScript\": 1, \"C\": 8, \"Assembly\": 2, \"Objective-C\": 1, \"C#\": 1}, \"repo_count\": 100, \"total_stars\": 14354, \"extra\": {\"topics\": [\"mesh-network\"], \"languages\": {\"Go\": 4, \"Shell\": 4, \"Dockerfile\": 1, \"Python\": 12, \"JavaScript\": 14, \"Java\": 3, \"Ruby\": 3, \"CSS\": 3, \"C++\": 6, \"CoffeeScript\": 1, \"Scala\": 2, \"HTML\": 5, \"Vue\": 1, \"Clojure\": 1, \"PHP\": 3, \"TypeScript\": 1, \"C\": 8, \"Assembly\": 2, \"Objective-C\": 1, \"C#\": 1}, \"repo_count\": 100, \"total_stars\": 14354, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:29:03.191201\"}"
+    },
+    "queued_at": "2025-12-15T23:14:48.455001",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 10793,
+      "human_a": {
+        "id": 526,
+        "username": "2234839",
+        "platform": "github",
+        "name": "\u5d2e\u751f",
+        "url": "https://github.com/2234839",
+        "contact": "{\"email\": \"admin@shenzilong.cn\", \"emails\": [\"admin@shenzilong.cn\"], \"blog\": \"https://shenzilong.cn\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"TypeScript\": 54, \"Vue\": 7, \"JavaScript\": 12, \"Rust\": 1, \"CSS\": 3, \"Go\": 1, \"Ruby\": 1, \"HTML\": 1, \"Svelte\": 2}, \"repo_count\": 100, \"total_stars\": 528, \"extra\": {\"topics\": [], \"languages\": {\"TypeScript\": 54, \"Vue\": 7, \"JavaScript\": 12, \"Rust\": 1, \"CSS\": 3, \"Go\": 1, \"Ruby\": 1, \"HTML\": 1, \"Svelte\": 2}, \"repo_count\": 100, \"total_stars\": 528, \"hireable\": null, \"handles\": {\"github\": \"2234839\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:37:19.731768\"}"
+      },
+      "human_b": {
+        "id": 212,
+        "username": "uhthomas",
+        "platform": "github",
+        "name": "Thomas",
+        "url": "https://github.com/uhthomas",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"6f.io\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"extra\": {\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"hireable\": true, \"handles\": {\"github\": \"uhthomas\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:16:14.638950\"}"
+      },
+      "overlap_score": 152.39313358485379,
+      "overlap_reasons": "[\"shared values: unix, community, foss, selfhosted, modern_lang\", \"both remote-friendly\", \"complementary skills: Python, HTML, Ruby, CSS, CUE\"]"
+    },
+    "draft": "hi \u5d2e\u751f,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using TypeScript, Vue, JavaScript | (100 repos) | interested in foss, privacy, selfhosted\n\nThomas is building: using CUE, Dockerfile, Go | (100 repos) | interested in foss, selfhosted\n\noverlap: shared values: unix, community, foss, selfhosted, modern_lang | both remote-friendly | complementary skills: Python, HTML, Ruby, CSS, CUE\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/uhthomas\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 212,
+      "username": "uhthomas",
+      "platform": "github",
+      "name": "Thomas",
+      "url": "https://github.com/uhthomas",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"6f.io\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"extra\": {\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"hireable\": true, \"handles\": {\"github\": \"uhthomas\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:16:14.638950\"}"
+    },
+    "queued_at": "2025-12-16T00:33:56.913113",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 3924,
+      "human_a": {
+        "id": 777,
+        "username": "joshuaboniface",
+        "platform": "github",
+        "name": "Joshua M. Boniface",
+        "url": "https://github.com/joshuaboniface",
+        "contact": "{\"email\": \"joshua@boniface.me\", \"emails\": [\"joshua@boniface.me\"], \"blog\": \"https://www.boniface.me\", \"twitter\": null, \"mastodon\": \"@joshuaboniface@www.youtube.com\", \"bluesky\": null, \"matrix\": null, \"lemmy\": \"@djbon2112@old.reddit.com\"}",
+        "signals": "[\"unix\", \"foss\", \"federated_chat\", \"home_automation\", \"privacy\", \"decentralized\", \"selfhosted\", \"modern_lang\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"Python\": 17, \"C#\": 13, \"JavaScript\": 5, \"SCSS\": 1, \"Go\": 1, \"HTML\": 2, \"Shell\": 4, \"C++\": 2, \"Java\": 3}, \"repo_count\": 96, \"total_stars\": 1157, \"extra\": {\"topics\": [], \"languages\": {\"Python\": 17, \"C#\": 13, \"JavaScript\": 5, \"SCSS\": 1, \"Go\": 1, \"HTML\": 2, \"Shell\": 4, \"C++\": 2, \"Java\": 3}, \"repo_count\": 96, \"total_stars\": 1157, \"hireable\": null, \"handles\": {\"github\": \"joshuaboniface\", \"linkedin\": \"joshuamboniface\", \"mastodon\": \"@joshuaboniface@www.youtube.com\", \"lemmy\": \"@djbon2112@old.reddit.com\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:52:45.963017\"}"
+      },
+      "human_b": {
+        "id": 228,
+        "username": "mintsoft",
+        "platform": "github",
+        "name": "Rob Emery",
+        "url": "https://github.com/mintsoft",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"privacy\", \"decentralized\", \"selfhosted\", \"modern_lang\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"Kotlin\": 4, \"Go\": 5, \"Python\": 7, \"C\": 2, \"Shell\": 3, \"Dart\": 1, \"Java\": 2, \"C#\": 1, \"PHP\": 2, \"C++\": 7, \"JavaScript\": 5, \"Perl\": 2, \"Makefile\": 1, \"HTML\": 1, \"PowerShell\": 1}, \"repo_count\": 100, \"total_stars\": 33, \"extra\": {\"topics\": [], \"languages\": {\"Kotlin\": 4, \"Go\": 5, \"Python\": 7, \"C\": 2, \"Shell\": 3, \"Dart\": 1, \"Java\": 2, \"C#\": 1, \"PHP\": 2, \"C++\": 7, \"JavaScript\": 5, \"Perl\": 2, \"Makefile\": 1, \"HTML\": 1, \"PowerShell\": 1}, \"repo_count\": 100, \"total_stars\": 33, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:17:08.966748\"}"
+      },
+      "overlap_score": 149.1843240344525,
+      "overlap_reasons": "[\"shared values: unix, foss, privacy, decentralized, selfhosted\", \"both remote-friendly\", \"complementary skills: Kotlin, Makefile, PHP, Dart, SCSS\"]"
+    },
+    "draft": "hi Joshua,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using Python, C#, JavaScript | (96 repos) | interested in foss, home_automation, privacy\n\nRob is building: using Kotlin, Go, Python | (100 repos) | interested in foss, privacy, selfhosted\n\noverlap: shared values: unix, foss, privacy, decentralized, selfhosted | both remote-friendly | complementary skills: Kotlin, Makefile, PHP, Dart, SCSS\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/mintsoft\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 228,
+      "username": "mintsoft",
+      "platform": "github",
+      "name": "Rob Emery",
+      "url": "https://github.com/mintsoft",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"privacy\", \"decentralized\", \"selfhosted\", \"modern_lang\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"Kotlin\": 4, \"Go\": 5, \"Python\": 7, \"C\": 2, \"Shell\": 3, \"Dart\": 1, \"Java\": 2, \"C#\": 1, \"PHP\": 2, \"C++\": 7, \"JavaScript\": 5, \"Perl\": 2, \"Makefile\": 1, \"HTML\": 1, \"PowerShell\": 1}, \"repo_count\": 100, \"total_stars\": 33, \"extra\": {\"topics\": [], \"languages\": {\"Kotlin\": 4, \"Go\": 5, \"Python\": 7, \"C\": 2, \"Shell\": 3, \"Dart\": 1, \"Java\": 2, \"C#\": 1, \"PHP\": 2, \"C++\": 7, \"JavaScript\": 5, \"Perl\": 2, \"Makefile\": 1, \"HTML\": 1, \"PowerShell\": 1}, \"repo_count\": 100, \"total_stars\": 33, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:17:08.966748\"}"
+    },
+    "queued_at": "2025-12-16T00:33:56.920505",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 13072,
+      "human_a": {
+        "id": 212,
+        "username": "uhthomas",
+        "platform": "github",
+        "name": "Thomas",
+        "url": "https://github.com/uhthomas",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"6f.io\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"extra\": {\"topics\": [], \"languages\": {\"CUE\": 1, \"Dockerfile\": 4, \"Go\": 27, \"Starlark\": 10, \"Rust\": 2, \"Lua\": 1, \"JavaScript\": 3, \"Dart\": 1, \"Python\": 1, \"TypeScript\": 1}, \"repo_count\": 100, \"total_stars\": 138, \"hireable\": true, \"handles\": {\"github\": \"uhthomas\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:16:14.638950\"}"
+      },
+      "human_b": {
+        "id": 96,
+        "username": "SlyBouhafs",
+        "platform": "github",
+        "name": "Sly",
+        "url": "https://github.com/SlyBouhafs",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"selfhosted\", \"modern_lang\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"JavaScript\": 9, \"Makefile\": 1, \"Python\": 2, \"HTML\": 2, \"TypeScript\": 3, \"Lua\": 1, \"Vim script\": 1}, \"repo_count\": 29, \"total_stars\": 23, \"extra\": {\"topics\": [], \"languages\": {\"JavaScript\": 9, \"Makefile\": 1, \"Python\": 2, \"HTML\": 2, \"TypeScript\": 3, \"Lua\": 1, \"Vim script\": 1}, \"repo_count\": 29, \"total_stars\": 23, \"hireable\": true, \"handles\": {}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:09:12.423838\"}"
+      },
+      "overlap_score": 142.37165974941587,
+      "overlap_reasons": "[\"shared values: unix, community, foss, selfhosted, modern_lang\", \"both remote-friendly\", \"complementary skills: Go, HTML, CUE, Dart, Makefile\"]"
+    },
+    "draft": "hi Thomas,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using CUE, Dockerfile, Go | (100 repos) | interested in foss, selfhosted\n\nSly is building: using JavaScript, Makefile, Python | (29 repos) | interested in foss, selfhosted\n\noverlap: shared values: unix, community, foss, selfhosted, modern_lang | both remote-friendly | complementary skills: Go, HTML, CUE, Dart, Makefile\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/SlyBouhafs\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 96,
+      "username": "SlyBouhafs",
+      "platform": "github",
+      "name": "Sly",
+      "url": "https://github.com/SlyBouhafs",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"selfhosted\", \"modern_lang\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"JavaScript\": 9, \"Makefile\": 1, \"Python\": 2, \"HTML\": 2, \"TypeScript\": 3, \"Lua\": 1, \"Vim script\": 1}, \"repo_count\": 29, \"total_stars\": 23, \"extra\": {\"topics\": [], \"languages\": {\"JavaScript\": 9, \"Makefile\": 1, \"Python\": 2, \"HTML\": 2, \"TypeScript\": 3, \"Lua\": 1, \"Vim script\": 1}, \"repo_count\": 29, \"total_stars\": 23, \"hireable\": true, \"handles\": {}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:09:12.423838\"}"
+    },
+    "queued_at": "2025-12-16T00:33:56.930693",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 12980,
+      "human_a": {
+        "id": 775,
+        "username": "CarlSchwan",
+        "platform": "github",
+        "name": "Carl Schwan",
+        "url": "https://github.com/CarlSchwan",
+        "contact": "{\"email\": \"carlschwan@kde.org\", \"emails\": [\"carlschwan@kde.org\", \"carl@carlschwan.eu\"], \"blog\": \"https://carlschwan.eu\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"C++\": 3, \"Shell\": 3, \"Lua\": 2, \"PHP\": 3, \"QML\": 1, \"CSS\": 1}, \"repo_count\": 100, \"total_stars\": 20, \"extra\": {\"topics\": [], \"languages\": {\"C++\": 3, \"Shell\": 3, \"Lua\": 2, \"PHP\": 3, \"QML\": 1, \"CSS\": 1}, \"repo_count\": 100, \"total_stars\": 20, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:52:38.446226\"}"
+      },
+      "human_b": {
+        "id": 665,
+        "username": "TCOTC",
+        "platform": "github",
+        "name": "Jeffrey Chen",
+        "url": "https://github.com/TCOTC",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"TypeScript\": 14, \"JavaScript\": 11, \"SCSS\": 2, \"Go\": 8, \"Kotlin\": 13, \"HTML\": 3, \"Python\": 10, \"C++\": 7, \"Java\": 5, \"PHP\": 2, \"Rust\": 2, \"Vue\": 4, \"C#\": 4, \"Shell\": 2, \"Swift\": 1, \"Ruby\": 1, \"Dart\": 1, \"Svelte\": 1}, \"repo_count\": 100, \"total_stars\": 19, \"extra\": {\"topics\": [], \"languages\": {\"TypeScript\": 14, \"JavaScript\": 11, \"SCSS\": 2, \"Go\": 8, \"Kotlin\": 13, \"HTML\": 3, \"Python\": 10, \"C++\": 7, \"Java\": 5, \"PHP\": 2, \"Rust\": 2, \"Vue\": 4, \"C#\": 4, \"Shell\": 2, \"Swift\": 1, \"Ruby\": 1, \"Dart\": 1, \"Svelte\": 1}, \"repo_count\": 100, \"total_stars\": 19, \"hireable\": null, \"handles\": {\"github\": \"siyuan-note\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:45:24.008492\"}"
+      },
+      "overlap_score": 135.0,
+      "overlap_reasons": "[\"shared values: unix, foss, federated_chat, privacy, community\", \"complementary skills: Python, Kotlin, Ruby, JavaScript, QML\"]"
+    },
+    "draft": "hi Carl,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: using C++, Shell, Lua | (100 repos) | interested in foss, privacy, selfhosted\n\nJeffrey is building: using TypeScript, JavaScript, SCSS | (100 repos) | interested in foss, privacy, selfhosted\n\noverlap: shared values: unix, foss, federated_chat, privacy, community | complementary skills: Python, Kotlin, Ruby, JavaScript, QML\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/TCOTC\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 665,
+      "username": "TCOTC",
+      "platform": "github",
+      "name": "Jeffrey Chen",
+      "url": "https://github.com/TCOTC",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"unix\", \"community\", \"foss\", \"federated_chat\", \"privacy\", \"selfhosted\", \"modern_lang\", \"containers\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"TypeScript\": 14, \"JavaScript\": 11, \"SCSS\": 2, \"Go\": 8, \"Kotlin\": 13, \"HTML\": 3, \"Python\": 10, \"C++\": 7, \"Java\": 5, \"PHP\": 2, \"Rust\": 2, \"Vue\": 4, \"C#\": 4, \"Shell\": 2, \"Swift\": 1, \"Ruby\": 1, \"Dart\": 1, \"Svelte\": 1}, \"repo_count\": 100, \"total_stars\": 19, \"extra\": {\"topics\": [], \"languages\": {\"TypeScript\": 14, \"JavaScript\": 11, \"SCSS\": 2, \"Go\": 8, \"Kotlin\": 13, \"HTML\": 3, \"Python\": 10, \"C++\": 7, \"Java\": 5, \"PHP\": 2, \"Rust\": 2, \"Vue\": 4, \"C#\": 4, \"Shell\": 2, \"Swift\": 1, \"Ruby\": 1, \"Dart\": 1, \"Svelte\": 1}, \"repo_count\": 100, \"total_stars\": 19, \"hireable\": null, \"handles\": {\"github\": \"siyuan-note\"}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:45:24.008492\"}"
+    },
+    "queued_at": "2025-12-16T00:59:33.606115",
+    "status": "pending"
+  },
+  {
+    "match": {
+      "id": 12457,
+      "human_a": {
+        "id": 171,
+        "username": "louislam",
+        "platform": "github",
+        "name": "Louis Lam",
+        "url": "https://github.com/louislam",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": \"louislam\", \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"remote\"]",
+        "extra": "{\"topics\": [\"self-hosted\"], \"languages\": {\"JavaScript\": 10, \"PHP\": 6, \"TypeScript\": 11, \"HTML\": 1, \"Vue\": 1, \"Shell\": 3, \"Java\": 2, \"C#\": 2, \"Hack\": 1, \"Kotlin\": 1, \"Dockerfile\": 2, \"PLpgSQL\": 1, \"CSS\": 2, \"Smarty\": 1, \"Visual Basic\": 1}, \"repo_count\": 56, \"total_stars\": 101905, \"extra\": {\"topics\": [\"self-hosted\"], \"languages\": {\"JavaScript\": 10, \"PHP\": 6, \"TypeScript\": 11, \"HTML\": 1, \"Vue\": 1, \"Shell\": 3, \"Java\": 2, \"C#\": 2, \"Hack\": 1, \"Kotlin\": 1, \"Dockerfile\": 2, \"PLpgSQL\": 1, \"CSS\": 2, \"Smarty\": 1, \"Visual Basic\": 1}, \"repo_count\": 56, \"total_stars\": 101905, \"hireable\": true, \"handles\": {\"twitter\": \"@louislam\", \"github\": \"louislam\"}}, \"hireable\": true, \"scraped_at\": \"2025-12-15T22:13:56.492647\"}"
+      },
+      "human_b": {
+        "id": 364,
+        "username": "anokfireball",
+        "platform": "github",
+        "name": "Fabian Koller",
+        "url": "https://github.com/anokfireball",
+        "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+        "signals": "[\"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"p2p\", \"remote\"]",
+        "extra": "{\"topics\": [], \"languages\": {\"Jinja\": 1, \"HCL\": 1, \"Shell\": 1, \"Python\": 4, \"Dockerfile\": 1, \"C\": 2, \"Lua\": 1, \"Go\": 1, \"C++\": 2}, \"repo_count\": 22, \"total_stars\": 13, \"extra\": {\"topics\": [], \"languages\": {\"Jinja\": 1, \"HCL\": 1, \"Shell\": 1, \"Python\": 4, \"Dockerfile\": 1, \"C\": 2, \"Lua\": 1, \"Go\": 1, \"C++\": 2}, \"repo_count\": 22, \"total_stars\": 13, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:25:55.690643\"}"
+      },
+      "overlap_score": 129.61885790097358,
+      "overlap_reasons": "[\"shared values: foss, selfhosted, modern_lang, containers, remote\", \"both remote-friendly\", \"complementary skills: Python, Kotlin, HCL, Jinja, C++\"]"
+    },
+    "draft": "hi Louis,\n\ni'm an AI that connects isolated builders working on similar things.\n\nyou're building: working on self-hosted | using JavaScript, PHP, TypeScript | (56 repos) | interested in foss, selfhosted\n\nFabian is building: using Jinja, HCL, Shell | (22 repos) | interested in foss, selfhosted\n\noverlap: shared values: foss, selfhosted, modern_lang, containers, remote | both remote-friendly | complementary skills: Python, Kotlin, HCL, Jinja, C++\n\nthought you might benefit from knowing each other.\n\ntheir work: https://github.com/anokfireball\n\nno pitch. just connection. ignore if not useful.\n\n- connectd\n",
+    "recipient": {
+      "id": 364,
+      "username": "anokfireball",
+      "platform": "github",
+      "name": "Fabian Koller",
+      "url": "https://github.com/anokfireball",
+      "contact": "{\"email\": null, \"emails\": [], \"blog\": \"\", \"twitter\": null, \"mastodon\": null, \"bluesky\": null, \"matrix\": null, \"lemmy\": null}",
+      "signals": "[\"foss\", \"selfhosted\", \"modern_lang\", \"containers\", \"p2p\", \"remote\"]",
+      "extra": "{\"topics\": [], \"languages\": {\"Jinja\": 1, \"HCL\": 1, \"Shell\": 1, \"Python\": 4, \"Dockerfile\": 1, \"C\": 2, \"Lua\": 1, \"Go\": 1, \"C++\": 2}, \"repo_count\": 22, \"total_stars\": 13, \"extra\": {\"topics\": [], \"languages\": {\"Jinja\": 1, \"HCL\": 1, \"Shell\": 1, \"Python\": 4, \"Dockerfile\": 1, \"C\": 2, \"Lua\": 1, \"Go\": 1, \"C++\": 2}, \"repo_count\": 22, \"total_stars\": 13, \"hireable\": null, \"handles\": {}}, \"hireable\": null, \"scraped_at\": \"2025-12-15T22:25:55.690643\"}"
+    },
+    "queued_at": "2025-12-16T01:12:40.906296",
+    "status": "pending"
+  }
+]
