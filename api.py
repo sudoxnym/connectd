@@ -347,21 +347,21 @@ async function loadLost() {
     var data = await res.json();
 
     var html = "<h2>lost builders (" + (data.total || 0) + ")</h2>";
-    html += "<p style=\"color:#c792ea;font-size:0.8em;margin-bottom:10px\">people who need to see that someone like them made it</p>";
+    html += '<p style=\"color:#c792ea;font-size:0.8em;margin-bottom:10px\">people who need to see that someone like them made it</p>';
 
     if (!data.matches || data.matches.length === 0) {
-        html += "<div class=\"meta\">no lost builders found</div>";
+        html += '<div class=\"meta\">no lost builders found</div>';
     }
 
     for (var i = 0; i < (data.matches || []).length; i++) {
         var m = data.matches[i];
-        html += "<div class=\"card\">";
-        html += "<div class=\"card-hdr\"><span class=\"to\">LOST: " + m.lost_user + "</span><span class=\"score\">" + m.match_score + "</span></div>";
-        html += "<div class=\"meta\">lost: " + m.lost_score + " | values: " + m.values_score + "</div>";
-        html += "<div class=\"meta\" style=\"color:#0f8\">BUILDER: " + m.builder + " (" + m.builder_platform + ")</div>";
-        html += "<div class=\"meta\">score: " + m.builder_score + " | repos: " + m.builder_repos + " | stars: " + m.builder_stars + "</div>";
-        html += "<div class=\"meta\">shared: " + (m.shared || []).join(", ") + "</div>";
-        html += "</div>";
+        html += '<div class=\"card\">";
+        html += '<div class=\"card-hdr\"><span class=\"to\">LOST: " + m.lost_user + "</span><span class=\"score\">" + m.match_score + "</span></div>';
+        html += '<div class=\"meta\">lost: " + m.lost_score + " | values: " + m.values_score + "</div>';
+        html += '<div class=\"meta\" style=\"color:#0f8\">BUILDER: " + m.builder + " (" + m.builder_platform + ")</div>';
+        html += '<div class=\"meta\">score: " + m.builder_score + " | repos: " + m.builder_repos + " | stars: " + m.builder_stars + "</div>';
+        html += '<div class=\"meta\">shared: " + (m.shared || []).join(", ") + "</div>';
+        html += '</div>';
     }
 
     $("lost").innerHTML = html;
@@ -1054,7 +1054,7 @@ class APIHandler(BaseHTTPRequestHandler):
             db = Database()
             stats = db.stats()
             db.close()
-            
+
             # add central API stats if configured
             if CENTRAL_API and CENTRAL_KEY:
                 try:
@@ -1072,7 +1072,7 @@ class APIHandler(BaseHTTPRequestHandler):
                         }
                 except Exception as ce:
                     stats['central'] = {'error': str(ce)}
-            
+
             self._send_json(stats)
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
