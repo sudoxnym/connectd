@@ -71,7 +71,7 @@ email: connectd@sudoxreboot.com
 """
 
 
-def draft_intro_with_llm(match_data: dict, recipient: str = 'a', dry_run: bool = True):
+def draft_intro_with_llm(match_data: dict, recipient: str = 'a', dry_run: bool = True, recipient_token: str = None, interested_count: int = 0):
     """
     draft an intro message using groq llm.
     
@@ -219,9 +219,45 @@ return ONLY the subject line."""
         
         subject = subject_response.choices[0].message.content.strip().strip('"').strip("'")
         
+        # add profile link and interest section
+        profile_url = f"https://connectd.sudoxreboot.com/{about_name}"
+        if recipient_token:
+            profile_url += f"?t={recipient_token}"
+        
+        profile_section_html = f"""
+<div style="margin-top: 20px; padding: 16px; background: #2d1f3d; border: 1px solid #8b5cf6; border-radius: 8px;">
+  <div style="color: #c792ea; font-size: 14px; margin-bottom: 8px;">here's the profile we built for {about_name}:</div>
+  <a href="{profile_url}" style="color: #82aaff; font-size: 16px;">{profile_url}</a>
+</div>
+"""
+        
+        profile_section_plain = f"""
+
+---
+here's the profile we built for {about_name}:
+{profile_url}
+"""
+        
+        # add interested section if recipient has people wanting to chat
+        interest_section_html = ""
+        interest_section_plain = ""
+        if recipient_token and interested_count > 0:
+            interest_url = f"https://connectd.sudoxreboot.com/interested/{recipient_token}"
+            people_word = "person wants" if interested_count == 1 else "people want"
+            interest_section_html = f"""
+<div style="margin-top: 12px; padding: 16px; background: #1f2d3d; border: 1px solid #0f8; border-radius: 8px;">
+  <div style="color: #0f8; font-size: 14px;">{interested_count} {people_word} to chat with you:</div>
+  <a href="{interest_url}" style="color: #82aaff; font-size: 14px;">{interest_url}</a>
+</div>
+"""
+            interest_section_plain = f"""
+{interested_count} {people_word} to chat with you:
+{interest_url}
+"""
+        
         # format html
-        draft_html = f"<div style='font-family: monospace; white-space: pre-wrap; color: #e0e0e0; background: #1a1a1a; padding: 20px;'>{body}</div>{SIGNATURE_HTML}"
-        draft_plain = body + SIGNATURE_PLAINTEXT
+        draft_html = f"<div style='font-family: monospace; white-space: pre-wrap; color: #e0e0e0; background: #1a1a1a; padding: 20px;'>{body}</div>{profile_section_html}{interest_section_html}{SIGNATURE_HTML}"
+        draft_plain = body + profile_section_plain + interest_section_plain + SIGNATURE_PLAINTEXT
         
         return {
             'subject': subject,

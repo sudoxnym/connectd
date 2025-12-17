@@ -139,20 +139,18 @@ def save_priority_match(conn, priority_user_id, human_id, overlap_data):
 
 
 def get_priority_user_matches(conn, priority_user_id, status=None, limit=50):
-    """get matches for a priority user"""
+    """get matches for a priority user (humans fetched from CENTRAL separately)"""
     c = conn.cursor()
 
     if status:
-        c.execute('''SELECT pm.*, h.* FROM priority_matches pm
-                     JOIN humans h ON pm.matched_human_id = h.id
-                     WHERE pm.priority_user_id = ? AND pm.status = ?
-                     ORDER BY pm.overlap_score DESC
+        c.execute('''SELECT * FROM priority_matches
+                     WHERE priority_user_id = ? AND status = ?
+                     ORDER BY overlap_score DESC
                      LIMIT ?''', (priority_user_id, status, limit))
     else:
-        c.execute('''SELECT pm.*, h.* FROM priority_matches pm
-                     JOIN humans h ON pm.matched_human_id = h.id
-                     WHERE pm.priority_user_id = ?
-                     ORDER BY pm.overlap_score DESC
+        c.execute('''SELECT * FROM priority_matches
+                     WHERE priority_user_id = ?
+                     ORDER BY overlap_score DESC
                      LIMIT ?''', (priority_user_id, limit))
 
     return [dict(row) for row in c.fetchall()]

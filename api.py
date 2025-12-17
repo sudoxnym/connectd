@@ -12,13 +12,21 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
-from db import Database
-from db.users import get_priority_users, get_priority_user_matches, get_priority_user
+from central_client import CentralClient, get_client
+from profile_page import render_profile
 
 # central API config
 import requests
 CENTRAL_API = os.environ.get('CONNECTD_CENTRAL_API', '')
 CENTRAL_KEY = os.environ.get('CONNECTD_API_KEY', '')
+
+# global client instance
+_central = None
+def get_central():
+    global _central
+    if _central is None:
+        _central = get_client()
+    return _central
 
 API_PORT = int(os.environ.get('CONNECTD_API_PORT', 8099))
 
@@ -180,31 +188,18 @@ async function loadStats() {
         uptime = hrs + 'h ' + mins + 'm';
     }
 
-    $('status').innerHTML = 'daemon <b>' + (h.running ? 'ON' : 'OFF') + '</b> | ' + uptime + ' | ' + h.intros_today + ' today';
-
-    var centralHtml = '';
-    if (s.central && !s.central.error) {
-        centralHtml = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #333">' +
-            '<div style="color:#82aaff;font-size:0.8em;margin-bottom:8px">// central api</div>' +
-            '<div class="stats">' +
-            '<div class="stat"><b>' + s.central.total_humans + '</b><small>humans</small></div>' +
-            '<div class="stat"><b>' + s.central.total_matches.toLocaleString() + '</b><small>matches</small></div>' +
-            '<div class="stat"><b>' + s.central.lost_builders + '</b><small>lost</small></div>' +
-            '<div class="stat"><b>' + s.central.intros_sent + '</b><small>sent</small></div>' +
-            '<div class="stat"><b>' + s.central.active_instances + '</b><small>instances</small></div>' +
-            '</div></div>';
-    }
+    $('status').innerHTML = 'daemon <b>' + (h.running ? 'ON' : 'OFF') + '</b> | ' + uptime + ' | ' + (h.intros_today || 0) + ' today | ' + (s.active_instances || 1) + ' instances';
 
     $('stats').innerHTML =
-        '<div style="color:#666;font-size:0.8em;margin-bottom:8px">// local</div>' +
         '<div class="stats">' +
-        '<div class="stat"><b>' + s.total_humans + '</b><small>humans</small></div>' +
-        '<div class="stat"><b>' + s.total_matches + '</b><small>matches</small></div>' +
-        '<div class="stat"><b>' + h.score_90_plus + '</b><small>90+</small></div>' +
-        '<div class="stat"><b>' + h.score_80_89 + '</b><small>80+</small></div>' +
-        '<div class="stat"><b>' + h.matches_pending + '</b><small>queue</small></div>' +
-        '<div class="stat"><b>' + s.sent_intros + '</b><small>sent</small></div>' +
-        '</div>' + centralHtml;
+        '<div class="stat"><b>' + (s.total_humans || 0) + '</b><small>humans</small></div>' +
+        '<div class="stat"><b>' + (s.total_matches || 0).toLocaleString() + '</b><small>matches</small></div>' +
+        '<div class="stat"><b>' + (s.lost_builders || 0) + '</b><small>lost</small></div>' +
+        '<div class="stat"><b>' + (s.builders || 0) + '</b><small>builders</small></div>' +
+        '<div class="stat"><b>' + (h.score_90_plus || 0) + '</b><small>90+</small></div>' +
+        '<div class="stat"><b>' + (h.score_80_89 || 0) + '</b><small>80+</small></div>' +
+        '<div class="stat"><b>' + (s.intros_sent || 0) + '</b><small>sent</small></div>' +
+        '</div>';
 }
 
 async function loadHost() {
@@ -343,28 +338,28 @@ async function loadFailed() {
     $('failed').innerHTML = html;
 }
 async function loadLost() {
-    var res = await fetch("/api/lost_builders");
+    var res = await fetch('/api/lost_builders');
     var data = await res.json();
 
-    var html = "<h2>lost builders (" + (data.total || 0) + ")</h2>";
-    html += '<p style=\"color:#c792ea;font-size:0.8em;margin-bottom:10px\">people who need to see that someone like them made it</p>';
+    var html = '<h2>lost builders (' + (data.total || 0) + ')</h2>';
+    html += '<p style="color:#c792ea;font-size:0.8em;margin-bottom:10px">people who need to see that someone like them made it</p>';
 
     if (!data.matches || data.matches.length === 0) {
-        html += '<div class=\"meta\">no lost builders found</div>';
+        html += '<div class="meta">no lost builders found</div>';
     }
 
     for (var i = 0; i < (data.matches || []).length; i++) {
         var m = data.matches[i];
-        html += '<div class=\"card\">";
-        html += '<div class=\"card-hdr\"><span class=\"to\">LOST: " + m.lost_user + "</span><span class=\"score\">" + m.match_score + "</span></div>';
-        html += '<div class=\"meta\">lost: " + m.lost_score + " | values: " + m.values_score + "</div>';
-        html += '<div class=\"meta\" style=\"color:#0f8\">BUILDER: " + m.builder + " (" + m.builder_platform + ")</div>';
-        html += '<div class=\"meta\">score: " + m.builder_score + " | repos: " + m.builder_repos + " | stars: " + m.builder_stars + "</div>';
-        html += '<div class=\"meta\">shared: " + (m.shared || []).join(", ") + "</div>';
+        html += '<div class="card">';
+        html += '<div class="card-hdr"><span class="to">LOST: ' + m.lost_user + '</span><span class="score">' + m.match_score + '</span></div>';
+        html += '<div class="meta">lost: ' + m.lost_score + ' | values: ' + m.values_score + '</div>';
+        html += '<div class="meta" style="color:#0f8">BUILDER: ' + m.builder + ' (' + m.builder_platform + ')</div>';
+        html += '<div class="meta">score: ' + m.builder_score + ' | repos: ' + m.builder_repos + ' | stars: ' + m.builder_stars + '</div>';
+        html += '<div class="meta">shared: ' + (m.shared || []).join(', ') + '</div>';
         html += '</div>';
     }
 
-    $("lost").innerHTML = html;
+    $('lost').innerHTML = html;
 }
 
 
@@ -489,6 +484,13 @@ class APIHandler(BaseHTTPRequestHandler):
             self._handle_user()
         elif path == '/api/lost_builders':
             self._handle_lost_builders()
+        elif path.startswith('/profile/'):
+            self._handle_profile_by_username()
+        elif path.startswith('/humans/') and not path.startswith('/api/'):
+            self._handle_profile_by_id()
+        elif path.startswith('/api/humans/') and path.endswith('/full'):
+            self._handle_human_full_json()
+
         else:
             self._send_json({'error': 'not found'}, 404)
     def _handle_favicon(self):
@@ -510,52 +512,44 @@ class APIHandler(BaseHTTPRequestHandler):
         self.wfile.write(DASHBOARD_HTML.encode())
 
     def _handle_sent_intros(self):
-        from pathlib import Path
-        log_path = Path("/app/data/delivery_log.json")
-        sent = []
-        if log_path.exists():
-            with open(log_path) as f:
-                log = json.load(f)
-            sent = log.get("sent", [])[-20:]
-            sent.reverse()
-        self._send_json({"sent": sent})
+        try:
+            central = get_central()
+            history = central.get_outreach_history(status='sent', limit=20)
+            sent = [{'recipient_id': h.get('human_id'), 'method': h.get('sent_via', 'unknown'),
+                     'draft': h.get('draft', ''), 'timestamp': h.get('completed_at', '')}
+                    for h in history]
+            self._send_json({"sent": sent})
+        except Exception as e:
+            self._send_json({"sent": [], "error": str(e)})
 
     def _handle_failed_intros(self):
-        from pathlib import Path
-        log_path = Path("/app/data/delivery_log.json")
-        failed = []
-        if log_path.exists():
-            with open(log_path) as f:
-                log = json.load(f)
-            failed = log.get("failed", [])
-        self._send_json({"failed": failed})
+        try:
+            central = get_central()
+            history = central.get_outreach_history(status='failed', limit=50)
+            failed = [{'recipient_id': h.get('human_id'), 'error': h.get('error', 'unknown'),
+                       'timestamp': h.get('completed_at', '')}
+                      for h in history]
+            self._send_json({"failed": failed})
+        except Exception as e:
+            self._send_json({"failed": [], "error": str(e)})
 
     def _handle_host(self):
-        """daemon status and match stats"""
-        import sqlite3
+        """daemon status and match stats from central"""
         state = get_daemon_state()
         try:
-            conn = sqlite3.connect('/data/db/connectd.db')
-            c = conn.cursor()
-            c.execute("SELECT COUNT(*) FROM matches WHERE status='pending' AND overlap_score >= 60")
-            pending = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE status='intro_sent'")
-            sent = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE status='rejected'")
-            rejected = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches")
-            total = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE overlap_score >= 90")
-            s90 = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE overlap_score >= 80 AND overlap_score < 90")
-            s80 = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE overlap_score >= 70 AND overlap_score < 80")
-            s70 = c.fetchone()[0]
-            c.execute("SELECT COUNT(*) FROM matches WHERE overlap_score >= 60 AND overlap_score < 70")
-            s60 = c.fetchone()[0]
-            conn.close()
+            central = get_central()
+            stats = central.get_stats()
+            total = stats.get('total_matches', 0)
+            sent = stats.get('intros_sent', 0)
+            pending = stats.get('pending_outreach', 0)
+            # score distribution - sample high scores only
+            high_matches = central.get_matches(min_score=60, limit=5000)
+            s90 = sum(1 for m in high_matches if m.get('overlap_score', 0) >= 90)
+            s80 = sum(1 for m in high_matches if 80 <= m.get('overlap_score', 0) < 90)
+            s70 = sum(1 for m in high_matches if 70 <= m.get('overlap_score', 0) < 80)
+            s60 = sum(1 for m in high_matches if 60 <= m.get('overlap_score', 0) < 70)
         except:
-            pending = sent = rejected = total = s90 = s80 = s70 = s60 = 0
+            pending = sent = total = s90 = s80 = s70 = s60 = 0
         uptime = None
         if state.get('started_at'):
             try:
@@ -565,7 +559,7 @@ class APIHandler(BaseHTTPRequestHandler):
         self._send_json({
             'running': state.get('running', False), 'dry_run': state.get('dry_run', False),
             'uptime_seconds': uptime, 'intros_today': state.get('intros_today', 0),
-            'matches_pending': pending, 'matches_sent': sent, 'matches_rejected': rejected, 'matches_total': total,
+            'matches_pending': pending, 'matches_sent': sent, 'matches_rejected': 0, 'matches_total': total,
             'score_90_plus': s90, 'score_80_89': s80, 'score_70_79': s70, 'score_60_69': s60,
         })
 
@@ -720,10 +714,8 @@ class APIHandler(BaseHTTPRequestHandler):
             self._send_json({'error': str(e)}, 500)
 
     def _handle_host_matches(self):
-        """matches for priority user"""
-        import sqlite3
+        """top matches from central"""
         import json as j
-        from db.users import get_priority_users
         limit = 20
         if '?' in self.path:
             for p in self.path.split('?')[1].split('&'):
@@ -731,28 +723,21 @@ class APIHandler(BaseHTTPRequestHandler):
                     try: limit = int(p.split('=')[1])
                     except: pass
         try:
-            db = Database()
-            users = get_priority_users(db.conn)
-            if not users:
-                self._send_json({'matches': [], 'host': None})
-                db.close()
-                return
-            host = users[0]
-            conn = sqlite3.connect('/data/db/connectd.db')
-            c = conn.cursor()
-            c.execute("""SELECT pm.id, pm.overlap_score, pm.overlap_reasons, pm.status, h.username, h.platform, h.contact
-                         FROM priority_matches pm JOIN humans h ON pm.matched_human_id = h.id
-                         WHERE pm.priority_user_id = ? ORDER BY pm.overlap_score DESC LIMIT ?""", (host['id'], limit))
+            central = get_central()
+            raw_matches = central.get_matches(min_score=60, limit=limit)
             matches = []
-            for row in c.fetchall():
-                reasons = j.loads(row[2]) if row[2] else []
-                contact = j.loads(row[6]) if row[6] else {}
-                matches.append({'id': row[0], 'score': int(row[1]), 'reasons': reasons, 'status': row[3],
-                               'other_user': row[4], 'other_platform': row[5],
-                               'contact': contact.get('email') or contact.get('mastodon') or contact.get('github') or ''})
-            conn.close()
-            db.close()
-            self._send_json({'host': host.get('github') or host.get('name'), 'matches': matches})
+            for m in raw_matches:
+                reasons = j.loads(m.get('overlap_reasons') or '[]') if isinstance(m.get('overlap_reasons'), str) else (m.get('overlap_reasons') or [])
+                matches.append({
+                    'id': m.get('id'),
+                    'score': int(m.get('overlap_score', 0)),
+                    'reasons': reasons[:3] if isinstance(reasons, list) else [],
+                    'status': 'pending',
+                    'other_user': m.get('human_b_username'),
+                    'other_platform': m.get('human_b_platform'),
+                    'contact': ''
+                })
+            self._send_json({'host': 'central', 'matches': matches})
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
 
@@ -1009,8 +994,7 @@ class APIHandler(BaseHTTPRequestHandler):
             self._send_json({'error': str(e)}, 500)
 
     def _handle_pending_matches(self):
-        """pending matches - returns BOTH directions for each match"""
-        import sqlite3
+        """pending matches from central - returns BOTH directions for each match"""
         import json as j
         limit = 30
         if '?' in self.path:
@@ -1019,60 +1003,40 @@ class APIHandler(BaseHTTPRequestHandler):
                     try: limit = int(p.split('=')[1])
                     except: pass
         try:
-            conn = sqlite3.connect('/data/db/connectd.db')
-            c = conn.cursor()
-            c.execute("""SELECT m.id, h1.username, h1.platform, h1.contact,
-                                h2.username, h2.platform, h2.contact, m.overlap_score, m.overlap_reasons
-                         FROM matches m
-                         JOIN humans h1 ON m.human_a_id = h1.id
-                         JOIN humans h2 ON m.human_b_id = h2.id
-                         WHERE m.status = 'pending' AND m.overlap_score >= 60
-                         ORDER BY m.overlap_score DESC LIMIT ?""", (limit // 2,))
+            central = get_central()
+            raw_matches = central.get_matches(min_score=60, limit=limit // 2)
             matches = []
-            for row in c.fetchall():
-                contact_a = j.loads(row[3]) if row[3] else {}
-                contact_b = j.loads(row[6]) if row[6] else {}
-                reasons = j.loads(row[8]) if row[8] else []
+            for m in raw_matches:
+                reasons = j.loads(m.get('overlap_reasons') or '[]') if isinstance(m.get('overlap_reasons'), str) else (m.get('overlap_reasons') or [])
                 # direction 1: TO human_a ABOUT human_b
-                method_a = 'email' if contact_a.get('email') else ('mastodon' if contact_a.get('mastodon') else None)
-                matches.append({'id': row[0], 'to_user': row[1], 'about_user': row[4],
-                               'score': int(row[7]), 'reasons': reasons[:3], 'method': method_a,
-                               'contact': contact_a.get('email') or contact_a.get('mastodon') or ''})
+                matches.append({
+                    'id': m.get('id'),
+                    'to_user': m.get('human_a_username'),
+                    'about_user': m.get('human_b_username'),
+                    'score': int(m.get('overlap_score', 0)),
+                    'reasons': reasons[:3] if isinstance(reasons, list) else [],
+                    'method': 'pending',
+                    'contact': ''
+                })
                 # direction 2: TO human_b ABOUT human_a
-                method_b = 'email' if contact_b.get('email') else ('mastodon' if contact_b.get('mastodon') else None)
-                matches.append({'id': row[0], 'to_user': row[4], 'about_user': row[1],
-                               'score': int(row[7]), 'reasons': reasons[:3], 'method': method_b,
-                               'contact': contact_b.get('email') or contact_b.get('mastodon') or ''})
-            conn.close()
+                matches.append({
+                    'id': m.get('id'),
+                    'to_user': m.get('human_b_username'),
+                    'about_user': m.get('human_a_username'),
+                    'score': int(m.get('overlap_score', 0)),
+                    'reasons': reasons[:3] if isinstance(reasons, list) else [],
+                    'method': 'pending',
+                    'contact': ''
+                })
             self._send_json({'matches': matches})
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
 
     def _handle_stats(self):
-        """return database statistics (local + central)"""
+        """return database statistics from central"""
         try:
-            db = Database()
-            stats = db.stats()
-            db.close()
-
-            # add central API stats if configured
-            if CENTRAL_API and CENTRAL_KEY:
-                try:
-                    headers = {'X-API-Key': CENTRAL_KEY}
-                    resp = requests.get(f'{CENTRAL_API}/stats', headers=headers, timeout=5)
-                    if resp.status_code == 200:
-                        central = resp.json()
-                        stats['central'] = {
-                            'total_humans': central.get('total_humans', 0),
-                            'lost_builders': central.get('lost_builders', 0),
-                            'builders': central.get('builders', 0),
-                            'total_matches': central.get('total_matches', 0),
-                            'intros_sent': central.get('intros_sent', 0),
-                            'active_instances': central.get('active_instances', 0),
-                        }
-                except Exception as ce:
-                    stats['central'] = {'error': str(ce)}
-
+            central = get_central()
+            stats = central.get_stats()
             self._send_json(stats)
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
@@ -1243,40 +1207,182 @@ class APIHandler(BaseHTTPRequestHandler):
 
 
     def _handle_lost_builders(self):
-        """return lost builders with their inspiring matches"""
+        """return lost builders from central"""
         try:
-            from matchd.lost import find_matches_for_lost_builders
-            db = Database()
-            matches, error = find_matches_for_lost_builders(db, min_lost_score=30, min_values_score=15, limit=50)
-            
+            central = get_central()
+            lost = central.get_lost_builders(min_score=30, limit=50)
+            builders = central.get_builders(min_score=50, limit=20)
+
+            # simple matching: pair lost builders with builders who have similar signals
             result = {
-                'total': len(matches) if matches else 0,
-                'error': error,
+                'total': len(lost),
+                'error': None if builders else 'no active builders available',
                 'matches': []
             }
-            
-            if matches:
-                for m in matches:
-                    lost = m.get('lost_user', {})
-                    builder = m.get('inspiring_builder', {})
-                    result['matches'].append({
-                        'lost_user': lost.get('username'),
-                        'lost_platform': lost.get('platform'),
-                        'lost_score': lost.get('lost_potential_score', 0),
-                        'values_score': lost.get('score', 0),
-                        'builder': builder.get('username'),
-                        'builder_platform': builder.get('platform'),
-                        'builder_score': builder.get('score', 0),
-                        'builder_repos': m.get('builder_repos', 0),
-                        'builder_stars': m.get('builder_stars', 0),
-                        'match_score': m.get('match_score', 0),
-                        'shared': m.get('shared_interests', [])[:5],
-                    })
-            
-            db.close()
+
+            if lost and builders:
+                for l in lost[:50]:
+                    # find best matching builder
+                    lost_signals = set(json.loads(l.get('signals') or '[]'))
+                    best_builder = None
+                    best_score = 0
+
+                    for b in builders:
+                        builder_signals = set(json.loads(b.get('signals') or '[]'))
+                        shared = lost_signals & builder_signals
+                        score = len(shared) * 10 + b.get('score', 0) * 0.1
+                        if score > best_score:
+                            best_score = score
+                            best_builder = b
+                            best_shared = list(shared)
+
+                    if best_builder:
+                        extra = json.loads(best_builder.get('extra') or '{}')
+                        result['matches'].append({
+                            'lost_user': l.get('username'),
+                            'lost_platform': l.get('platform'),
+                            'lost_score': l.get('lost_potential_score', 0),
+                            'values_score': l.get('score', 0),
+                            'builder': best_builder.get('username'),
+                            'builder_platform': best_builder.get('platform'),
+                            'builder_score': best_builder.get('score', 0),
+                            'builder_repos': extra.get('public_repos', 0),
+                            'builder_stars': extra.get('stars', 0),
+                            'match_score': best_score,
+                            'shared': best_shared[:5],
+                        })
+
             self._send_json(result)
         except Exception as e:
             self._send_json({'error': str(e)}, 500)
+
+
+    def _handle_profile_by_username(self):
+        """render profile page by username"""
+        path = self.path.split('?')[0]
+        parts = path.strip('/').split('/')
+
+        if len(parts) == 2:
+            username = parts[1]
+            platform = None
+        elif len(parts) == 3:
+            platform = parts[1]
+            username = parts[2]
+        else:
+            self._send_json({'error': 'invalid path'}, 400)
+            return
+
+        try:
+            central = get_central()
+
+            if platform:
+                humans = central.get_humans(platform=platform, limit=100)
+                human = next((h for h in humans if h.get('username', '').lower() == username.lower()), None)
+            else:
+                human = None
+                for plat in ['github', 'reddit', 'mastodon', 'lobsters', 'lemmy']:
+                    humans = central.get_humans(platform=plat, limit=500)
+                    human = next((h for h in humans if h.get('username', '').lower() == username.lower()), None)
+                    if human:
+                        break
+
+            if not human:
+                self.send_response(404)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(f'<html><body style="background:#0a0a0f;color:#f66;font-family:monospace;padding:40px;"><h1>not found</h1><p>no human found with username: {username}</p><a href="/" style="color:#82aaff">back</a></body></html>'.encode())
+                return
+
+            matches = central.get_matches(limit=10000)
+            match_count = sum(1 for m in matches if m.get('human_a_id') == human['id'] or m.get('human_b_id') == human['id'])
+
+            html = render_profile(human, match_count=match_count)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            self.wfile.write(html.encode())
+
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
+    def _handle_profile_by_id(self):
+        """render profile page by human ID"""
+        path = self.path.split('?')[0]
+        parts = path.strip('/').split('/')
+
+        if len(parts) != 2:
+            self._send_json({'error': 'invalid path'}, 400)
+            return
+
+        try:
+            human_id = int(parts[1])
+        except ValueError:
+            self._send_json({'error': 'invalid id'}, 400)
+            return
+
+        try:
+            central = get_central()
+            human = central.get_human(human_id)
+
+            if not human:
+                self.send_response(404)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(f'<html><body style="background:#0a0a0f;color:#f66;font-family:monospace;padding:40px;"><h1>not found</h1><p>no human found with id: {human_id}</p><a href="/" style="color:#82aaff">back</a></body></html>'.encode())
+                return
+
+            matches = central.get_matches(limit=10000)
+            match_count = sum(1 for m in matches if m.get('human_a_id') == human['id'] or m.get('human_b_id') == human['id'])
+
+            html = render_profile(human, match_count=match_count)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            self.wfile.write(html.encode())
+
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
+    def _handle_human_full_json(self):
+        """return full human data as JSON"""
+        path = self.path.split('?')[0]
+        parts = path.strip('/').split('/')
+
+        if len(parts) != 4 or parts[0] != 'api' or parts[1] != 'humans' or parts[3] != 'full':
+            self._send_json({'error': 'invalid path'}, 400)
+            return
+
+        try:
+            human_id = int(parts[2])
+        except ValueError:
+            self._send_json({'error': 'invalid id'}, 400)
+            return
+
+        try:
+            central = get_central()
+            human = central.get_human(human_id)
+
+            if not human:
+                self._send_json({'error': 'not found'}, 404)
+                return
+
+            for field in ['signals', 'negative_signals', 'reasons', 'contact', 'extra']:
+                if field in human and isinstance(human[field], str):
+                    try:
+                        human[field] = json.loads(human[field])
+                    except:
+                        pass
+
+            matches = central.get_matches(limit=10000)
+            human['match_count'] = sum(1 for m in matches if m.get('human_a_id') == human['id'] or m.get('human_b_id') == human['id'])
+
+            self._send_json(human)
+
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
 
 
 def run_api_server():
@@ -1284,7 +1390,6 @@ def run_api_server():
     server = HTTPServer(('0.0.0.0', API_PORT), APIHandler)
     print(f"connectd api running on port {API_PORT}")
     server.serve_forever()
-
 
 def start_api_thread():
     """start API server in background thread"""

@@ -1,10 +1,14 @@
 """
 introd/draft.py - AI writes intro messages referencing both parties' work
+now with interest system links
 """
 
 import json
 
-# intro template - transparent about being AI, neutral third party
+# base URL for connectd profiles
+CONNECTD_URL = "https://connectd.sudoxreboot.com"
+
+# intro template - now with interest links
 INTRO_TEMPLATE = """hi {recipient_name},
 
 i'm an AI that connects isolated builders working on similar things.
@@ -17,7 +21,8 @@ overlap: {overlap_summary}
 
 thought you might benefit from knowing each other.
 
-their work: {other_url}
+their profile: {profile_url}
+{interested_line}
 
 no pitch. just connection. ignore if not useful.
 
@@ -32,7 +37,7 @@ you: {recipient_summary}
 
 overlap: {overlap_summary}
 
-their work: {other_url}
+their profile: {profile_url}
 
 no pitch, just connection.
 """
@@ -51,12 +56,18 @@ def summarize_human(human_data):
     # signals/interests
     signals = human_data.get('signals', [])
     if isinstance(signals, str):
-        signals = json.loads(signals)
+        try:
+            signals = json.loads(signals)
+        except:
+            signals = []
 
     # extra data
     extra = human_data.get('extra', {})
     if isinstance(extra, str):
-        extra = json.loads(extra)
+        try:
+            extra = json.loads(extra)
+        except:
+            extra = {}
 
     # build summary based on available data
     topics = extra.get('topics', [])
@@ -103,7 +114,10 @@ def summarize_overlap(overlap_data):
     """generate overlap summary"""
     reasons = overlap_data.get('overlap_reasons', [])
     if isinstance(reasons, str):
-        reasons = json.loads(reasons)
+        try:
+            reasons = json.loads(reasons)
+        except:
+            reasons = []
 
     if reasons:
         return ' | '.join(reasons[:3])
@@ -116,12 +130,14 @@ def summarize_overlap(overlap_data):
     return "aligned values and interests"
 
 
-def draft_intro(match_data, recipient='a'):
+def draft_intro(match_data, recipient='a', recipient_token=None, interested_count=0):
     """
     draft an intro message for a match
 
     match_data: dict with human_a, human_b, overlap info
     recipient: 'a' or 'b' - who receives this intro
+    recipient_token: token for the recipient (to track who clicked)
+    interested_count: how many people are already interested in the recipient
 
     returns: dict with draft text, channel, metadata
     """
@@ -135,19 +151,37 @@ def draft_intro(match_data, recipient='a'):
     # get names
     recipient_name = recipient_human.get('name') or recipient_human.get('username', 'friend')
     other_name = other_human.get('name') or other_human.get('username', 'someone')
+    other_username = other_human.get('username', '')
 
     # generate summaries
     recipient_summary = summarize_human(recipient_human)
     other_summary = summarize_human(other_human)
     overlap_summary = summarize_overlap(match_data)
 
-    # other's url
-    other_url = other_human.get('url', '')
+    # build profile URL with token if available
+    if other_username:
+        profile_url = f"{CONNECTD_URL}/{other_username}"
+        if recipient_token:
+            profile_url += f"?t={recipient_token}"
+    else:
+        profile_url = other_human.get('url', '')
+
+    # interested line - tells them about their inbox
+    interested_line = ''
+    if recipient_token:
+        interested_url = f"{CONNECTD_URL}/interested/{recipient_token}"
+        if interested_count > 0:
+            interested_line = f"\n{interested_count} people already want to meet you: {interested_url}"
+        else:
+            interested_line = f"\nbe the first to connect: {interested_url}"
 
     # determine best channel
     contact = recipient_human.get('contact', {})
     if isinstance(contact, str):
-        contact = json.loads(contact)
+        try:
+            contact = json.loads(contact)
+        except:
+            contact = {}
 
     channel = None
     channel_address = None
@@ -156,15 +190,12 @@ def draft_intro(match_data, recipient='a'):
     if contact.get('email'):
         channel = 'email'
         channel_address = contact['email']
-    # github issue/discussion
     elif recipient_human.get('platform') == 'github':
         channel = 'github'
         channel_address = recipient_human.get('url')
-    # mastodon DM
     elif recipient_human.get('platform') == 'mastodon':
         channel = 'mastodon'
         channel_address = recipient_human.get('username')
-    # reddit message
     elif recipient_human.get('platform') == 'reddit':
         channel = 'reddit'
         channel_address = recipient_human.get('username')
@@ -180,12 +211,13 @@ def draft_intro(match_data, recipient='a'):
 
     # render draft
     draft = template.format(
-        recipient_name=recipient_name.split()[0] if recipient_name else 'friend',  # first name only
+        recipient_name=recipient_name.split()[0] if recipient_name else 'friend',
         recipient_summary=recipient_summary,
         other_name=other_name.split()[0] if other_name else 'someone',
         other_summary=other_summary,
         overlap_summary=overlap_summary,
-        other_url=other_url,
+        profile_url=profile_url,
+        interested_line=interested_line,
     )
 
     return {
@@ -196,15 +228,16 @@ def draft_intro(match_data, recipient='a'):
         'draft': draft,
         'overlap_score': match_data.get('overlap_score', 0),
         'match_id': match_data.get('id'),
+        'recipient_token': recipient_token,
     }
 
 
-def draft_intros_for_match(match_data):
+def draft_intros_for_match(match_data, token_a=None, token_b=None, interested_a=0, interested_b=0):
     """
     draft intros for both parties in a match
     returns list of two intro dicts
     """
-    intro_a = draft_intro(match_data, recipient='a')
-    intro_b = draft_intro(match_data, recipient='b')
+    intro_a = draft_intro(match_data, recipient='a', recipient_token=token_a, interested_count=interested_a)
+    intro_b = draft_intro(match_data, recipient='b', recipient_token=token_b, interested_count=interested_b)
 
     return [intro_a, intro_b]

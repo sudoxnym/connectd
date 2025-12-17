@@ -179,5 +179,26 @@ class CentralClient:
 
 
 # convenience function
+    
+    # === TOKENS ===
+    
+    def get_token(self, user_id: int, match_id: int = None) -> str:
+        """get or create a token for a user"""
+        params = {}
+        if match_id:
+            params['match_id'] = match_id
+        result = self._get(f'/api/token/{user_id}', params)
+        return result.get('token')
+    
+    def get_interested_count(self, user_id: int) -> int:
+        """get count of people interested in this user"""
+        try:
+            result = self._get(f'/api/interested_count/{user_id}')
+            return result.get('count', 0)
+        except:
+            return 0
+
+
+# convenience function
 def get_client() -> CentralClient:
     return CentralClient()
